@@ -21,6 +21,7 @@ under certain conditions; see `gpl-2.0.txt' for details.
 require 'libglade2'
 
 require 'about'
+require 'open_file'
 
 $prog = nil
 
@@ -46,7 +47,10 @@ def open_diag_about
 end
 
 def open_diag_file
-  $prog.glade['diag_file'].show_all
+  OpenFileDialog.new.show do |file_string|
+    # TODO tratar arquivo
+    puts file_string
+  end
 end
 
 def gtk_main_quit(widget)

@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby -w
 # -*- coding: utf-8 -*-
 =begin
-* Nome: rplac about dialog
-* Descrição: about dialog class
+* Nome: rplac help dialog
+* Descrição: help dialog class
 * Autor: Murilo de Lima
 * Data: 2009-11-20
 * Licença:
@@ -14,6 +14,7 @@ under certain conditions; see `gpl-2.0.txt' for details.
 
 =end
 
+
 require 'gtk2'
 
 class AboutDialog
@@ -21,9 +22,7 @@ class AboutDialog
   def initialize
     @diag = Gtk::AboutDialog.new
 
-    @diag.signal_connect('response') do |w, resp_id|
-      w.destroy
-    end
+    @diag.get_buttons
     
     @diag.program_name = 'rplac'
     @diag.version = '0.1'
@@ -49,5 +48,4 @@ junto com este programa; se não, escreva para a Free Software Foundation, Inc.,
   def show
     @diag.show
   end
-
 end
