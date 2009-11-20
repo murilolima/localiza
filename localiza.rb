@@ -1,9 +1,26 @@
-#!/usr/bin/env ruby
+#!/usr/bin/env ruby -w
 # -*- coding: utf-8 -*-
 #
 # This file is gererated by ruby-glade-create-template 1.1.4.
 #
+
+=begin
+* Nome: rplac main file
+* Descrição: programa principal
+* Autor: Joel Uchoa, Murilo de Lima
+* Data: 2009-11-06
+* Licença:
+
+rplac 0.1, Copyright (C) 2009  Joel Uchoa, Murilo de Lima
+rplac comes with ABSOLUTELY NO WARRANTY; for detais see `gpl-2.0.txt'.
+This is free software, and you are welcome to redistribute it
+under certain conditions; see `gpl-2.0.txt' for details.
+
+=end
+
 require 'libglade2'
+
+require 'about'
 
 $prog = nil
 
@@ -20,8 +37,12 @@ class LocalizaGlade
   
 end
 
-def open_diag_help
-  $prog.glade['diag_help'].show_all
+def close_diag_about
+  Gtk.main_quit
+end
+
+def open_diag_about
+  AboutDialog.new.show
 end
 
 def open_diag_file
