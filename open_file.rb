@@ -30,13 +30,12 @@ class OpenFileDialog
     end
   end
 
+  # testar: abrir arquivo normal, abrir pasta, abrir nada
   def open_file(fname)
-    if (fname)
-      unless (File.directory? fname)
-        f = File.new(fname)
-        @callback.call(f.read.to_s)
-        true
-      end
+    if (fname && !File.directory?(fname))
+      f = File.new(fname)
+      @callback.call(f.read.to_s)
+      true
     end
   ensure
     !f || f.close
