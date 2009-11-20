@@ -66,5 +66,8 @@ if __FILE__ == $0
   w = $prog.glade['main_window']
   w.signal_connect('destroy') { |w| gtk_main_quit(w) }
   w.show_all
+
+  $prog.glade['tela'].modify_bg(Gtk::STATE_NORMAL, Gdk::Color.new(0, 0, 0))
+  
   Gtk.main
 end

@@ -78,7 +78,14 @@
             <property name="visible">True</property>
             <property name="orientation">vertical</property>
             <child>
-              <placeholder/>
+              <widget class="GtkDrawingArea" id="tela">
+                <property name="height_request">200</property>
+                <property name="visible">True</property>
+              </widget>
+              <packing>
+                <property name="padding">5</property>
+                <property name="position">0</property>
+              </packing>
             </child>
             <child>
               <widget class="GtkHBox" id="hbox1">
@@ -89,7 +96,7 @@
                     <property name="orientation">vertical</property>
                     <child>
                       <widget class="GtkCheckButton" id="check_alg1">
-                        <property name="label" translatable="yes">checkbutton</property>
+                        <property name="label" translatable="yes">Algoritmo de Linha de Varredura - O(n&#xB2;) espa&#xE7;o</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
@@ -101,7 +108,7 @@
                     </child>
                     <child>
                       <widget class="GtkCheckButton" id="check_alg2">
-                        <property name="label" translatable="yes">checkbutton</property>
+                        <property name="label" translatable="yes">Algoritmo Incremental Probabil&#xED;stico - espa&#xE7;o esperado O(n)</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
@@ -116,10 +123,11 @@
                         <property name="visible">True</property>
                         <child>
                           <widget class="GtkToggleButton" id="bt_play_pause">
-                            <property name="label" translatable="yes">togglebutton</property>
+                            <property name="label">gtk-media-play</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="use_stock">True</property>
                           </widget>
                           <packing>
                             <property name="expand">False</property>
@@ -129,10 +137,11 @@
                         </child>
                         <child>
                           <widget class="GtkButton" id="bt_stop">
-                            <property name="label" translatable="yes">button</property>
+                            <property name="label">gtk-media-stop</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="use_stock">True</property>
                           </widget>
                           <packing>
                             <property name="expand">False</property>
@@ -142,10 +151,11 @@
                         </child>
                         <child>
                           <widget class="GtkButton" id="bt_step">
-                            <property name="label" translatable="yes">button</property>
+                            <property name="label">gtk-media-next</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="use_stock">True</property>
                           </widget>
                           <packing>
                             <property name="expand">False</property>
@@ -155,10 +165,11 @@
                         </child>
                         <child>
                           <widget class="GtkButton" id="bt_ff">
-                            <property name="label" translatable="yes">button</property>
+                            <property name="label">gtk-media-forward</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="use_stock">True</property>
                           </widget>
                           <packing>
                             <property name="expand">False</property>
@@ -173,7 +184,20 @@
                     </child>
                   </widget>
                   <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="padding">10</property>
                     <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkVSeparator" id="vseparator1">
+                    <property name="visible">True</property>
+                    <property name="orientation">vertical</property>
+                  </widget>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="position">1</property>
                   </packing>
                 </child>
                 <child>
@@ -182,7 +206,7 @@
                     <property name="orientation">vertical</property>
                     <child>
                       <widget class="GtkCheckButton" id="check_step">
-                        <property name="label" translatable="yes">checkbutton</property>
+                        <property name="label" translatable="yes">passo a passo			</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
@@ -193,21 +217,48 @@
                       </packing>
                     </child>
                     <child>
+                      <widget class="GtkHSeparator" id="hseparator1">
+                        <property name="visible">True</property>
+                      </widget>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="padding">9</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <widget class="GtkLabel" id="label3">
+                        <property name="visible">True</property>
+                        <property name="xalign">0</property>
+                        <property name="xpad">10</property>
+                        <property name="label" translatable="yes">Velocidade:</property>
+                      </widget>
+                      <packing>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
                       <widget class="GtkHScale" id="speed_bar">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="digits">0</property>
                       </widget>
                       <packing>
-                        <property name="position">1</property>
+                        <property name="position">3</property>
                       </packing>
                     </child>
                   </widget>
                   <packing>
-                    <property name="position">1</property>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="padding">10</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
               </widget>
               <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
                 <property name="position">1</property>
               </packing>
             </child>
