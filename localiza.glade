@@ -4,6 +4,7 @@
   <!-- interface-naming-policy project-wide -->
   <widget class="GtkWindow" id="main_window">
     <property name="title" translatable="yes">Ruby Point Location Algorithm Comparator</property>
+    <property name="resizable">False</property>
     <child>
       <widget class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
@@ -79,7 +80,7 @@
             <property name="orientation">vertical</property>
             <child>
               <widget class="GtkDrawingArea" id="tela">
-                <property name="height_request">200</property>
+                <property name="height_request">500</property>
                 <property name="visible">True</property>
               </widget>
               <packing>
@@ -101,6 +102,7 @@
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
                         <property name="draw_indicator">True</property>
+                        <signal name="toggled" handler="toggle_alg1"/>
                       </widget>
                       <packing>
                         <property name="position">0</property>
@@ -113,6 +115,7 @@
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
                         <property name="draw_indicator">True</property>
+                        <signal name="toggled" handler="toggle_alg2"/>
                       </widget>
                       <packing>
                         <property name="position">1</property>
@@ -128,6 +131,7 @@
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="use_stock">True</property>
+                            <signal name="toggled" handler="play_pause"/>
                           </widget>
                           <packing>
                             <property name="expand">False</property>
@@ -142,6 +146,7 @@
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="use_stock">True</property>
+                            <signal name="clicked" handler="stop"/>
                           </widget>
                           <packing>
                             <property name="expand">False</property>
@@ -156,6 +161,7 @@
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="use_stock">True</property>
+                            <signal name="clicked" handler="step"/>
                           </widget>
                           <packing>
                             <property name="expand">False</property>
@@ -170,6 +176,7 @@
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="use_stock">True</property>
+                            <signal name="clicked" handler="next"/>
                           </widget>
                           <packing>
                             <property name="expand">False</property>
@@ -211,6 +218,7 @@
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
                         <property name="draw_indicator">True</property>
+                        <signal name="toggled" handler="toggle_step"/>
                       </widget>
                       <packing>
                         <property name="position">0</property>
@@ -227,7 +235,7 @@
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkLabel" id="label3">
+                      <widget class="GtkLabel" id="label_speed">
                         <property name="visible">True</property>
                         <property name="xalign">0</property>
                         <property name="xpad">10</property>
@@ -242,6 +250,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="digits">0</property>
+                        <signal name="value_changed" handler="change_speed"/>
                       </widget>
                       <packing>
                         <property name="position">3</property>

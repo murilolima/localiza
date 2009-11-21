@@ -24,23 +24,15 @@ class OpenFileDialog
     @bt_cancel.signal_connect('clicked') { @diag.destroy }
     @bt_open = @diag.add_button(Gtk::Stock::OPEN, Gtk::Dialog::RESPONSE_ACCEPT)
     @bt_open.signal_connect('clicked') do
-      if open_file(@diag.filename)
+      # testar: abrir arquivo normal, abrir pasta, abrir nada
+      fname = @diag.filename
+      if fname && !File.directory?(fname)
+        @callback.call(fname)
         @diag.destroy
       end
     end
   end
 
-  # testar: abrir arquivo normal, abrir pasta, abrir nada
-  def open_file(fname)
-    if (fname && !File.directory?(fname))
-      f = File.new(fname)
-      @callback.call(f.read.to_s)
-      true
-    end
-  ensure
-    !f || f.close
-  end
-  
   def show(&callback)
     @diag.show
     @callback = callback
