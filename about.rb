@@ -1,11 +1,11 @@
 #!/usr/bin/env ruby -w
 # -*- coding: utf-8 -*-
 =begin
-* Nome: rplac about dialog
-* Descrição: about dialog class
-* Autor: Murilo de Lima
-* Data: 2009-11-20
-* Licença:
+* Name: rplac about dialog
+* Description: about dialog class
+* Author: Murilo de Lima
+* Date: 2009-11-20
+* License:
 
 rplac 0.1, Copyright (C) 2009  Joel Uchoa, Murilo de Lima
 rplac comes with ABSOLUTELY NO WARRANTY; for detais see `gpl-2.0.txt'.

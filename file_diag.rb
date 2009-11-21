@@ -1,11 +1,11 @@
 #!/usr/bin/env ruby -w
 # -*- coding: utf-8 -*-
 =begin
-* Nome: rplac open file dialog
-* Descrição: open file dialog class
-* Autor: Murilo de Lima
-* Data: 2009-11-20
-* Licença:
+* Name: rplac open file dialog
+* Description: open file dialog class
+* Author: Murilo de Lima
+* Date: 2009-11-20
+* License:
 
 rplac 0.1, Copyright (C) 2009  Joel Uchoa, Murilo de Lima
 rplac comes with ABSOLUTELY NO WARRANTY; for detais see `gpl-2.0.txt'.
@@ -24,7 +24,7 @@ class OpenFileDialog
     @bt_cancel.signal_connect('clicked') { @diag.destroy }
     @bt_open = @diag.add_button(Gtk::Stock::OPEN, Gtk::Dialog::RESPONSE_ACCEPT)
     @bt_open.signal_connect('clicked') do
-      # testar: abrir arquivo normal, abrir pasta, abrir nada
+      # testing: open normal file, open directory, open nothing
       fname = @diag.filename
       if fname && !File.directory?(fname)
         @callback.call(fname)

@@ -5,11 +5,11 @@
 #
 
 =begin
-* Nome: rplac main file
-* Descrição: programa principal
-* Autor: Joel Uchoa, Murilo de Lima
-* Data: 2009-11-06
-* Licença:
+* Name: rplac main file
+* Description: programa principal
+* Author: Joel Uchoa, Murilo de Lima
+* Date: 2009-11-06
+* License:
 
 rplac 0.1, Copyright (C) 2009  Joel Uchoa, Murilo de Lima
 rplac comes with ABSOLUTELY NO WARRANTY; for detais see `gpl-2.0.txt'.
@@ -101,6 +101,7 @@ end
 
 ####### methods for our control #########
 
+# flags controlling buttons
 class Flag
   # note that the value can have any type (we use boolean or integer)
   attr_reader :val
@@ -115,7 +116,6 @@ class Flag
   end
 end
 
-# flags controlling buttons
 $file_ok = Flag.new(false)
 $started = Flag.new(false)
 $n_alg = Flag.new(0)
