@@ -88,14 +88,18 @@ def play_pause
 end
 
 def stop
+  # TODO talvez mudar essas coisas de lugar, pois tambem precisa executá-las quando o algoritmo chega ao final por si só
   $prog.glade['bt_play_pause'].active = false
   $started.val = false
+  $last_part.val = false
 end
 
 def step
 end
 
 def next
+  $started.val = true
+  $last_part.val = true
 end
 
 
@@ -120,6 +124,7 @@ $file_ok = BtFlag.new(false)
 $started = BtFlag.new(false)
 $n_alg = BtFlag.new(0)
 $pap = BtFlag.new(false)
+$last_part = BtFlag.new(false)
 
 def update_bts
   $prog.glade['check_alg1'].sensitive =
@@ -129,8 +134,8 @@ def update_bts
     $prog.glade['speed_bar'].sensitive = !$pap.val || $n_alg.val == 2
   $prog.glade['bt_play_pause'].sensitive = $file_ok.val && ($n_alg.val > 0) && !($started.val && $pap.val)
   $prog.glade['bt_stop'].sensitive = $started.val
-  $prog.glade['bt_ff'].sensitive =
-    $prog.glade['bt_step'].sensitive = $started.val && ($n_alg.val == 1) && $pap.val
+  $prog.glade['bt_step'].sensitive = $started.val && ($n_alg.val == 1) && $pap.val
+  $prog.glade['bt_ff'].sensitive = $file_ok.val && ($n_alg.val > 0) && !$last_part.val
 end    
 
 # controlling status bar
