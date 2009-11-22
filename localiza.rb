@@ -155,9 +155,6 @@ if __FILE__ == $0
   w.show_all
 
   update_bts
-
-  # TODO inicializar com objeto de tela normal
-  $prog.glade['tela'].modify_bg(Gtk::STATE_NORMAL, Gdk::Color.new(0, 0, 0))
   
   Gtk.main
 end

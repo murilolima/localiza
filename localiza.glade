@@ -130,6 +130,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="tooltip" translatable="yes">Iniciar/pausar anima&#xE7;&#xE3;o</property>
                             <property name="use_stock">True</property>
                             <signal name="toggled" handler="play_pause"/>
                           </widget>
@@ -145,6 +146,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="tooltip" translatable="yes">Terminar anima&#xE7;&#xE3;o</property>
                             <property name="use_stock">True</property>
                             <signal name="clicked" handler="stop"/>
                           </widget>
@@ -160,6 +162,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="tooltip" translatable="yes">Executar o pr&#xF3;ximo passo</property>
                             <property name="use_stock">True</property>
                             <signal name="clicked" handler="step"/>
                           </widget>
@@ -175,6 +178,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="tooltip" translatable="yes">Pular para a pr&#xF3;xima etapa do algoritmo</property>
                             <property name="use_stock">True</property>
                             <signal name="clicked" handler="next"/>
                           </widget>
@@ -249,7 +253,9 @@
                       <widget class="GtkHScale" id="speed_bar">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="adjustment">0 0 110 0 10 10</property>
                         <property name="digits">0</property>
+                        <property name="value_pos">left</property>
                         <signal name="value_changed" handler="change_speed"/>
                       </widget>
                       <packing>
