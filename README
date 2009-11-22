@@ -1,8 +1,11 @@
 == gems requireds to development
     rake
     rspec
-    zentest
 
 == task on Rakefile
     'rake' or 'rake run' execute the applicaion
     'rake test' execute the tests with rspec
+
+=======
+Para executar:
+   ruby -w localiza.rb
