@@ -22,8 +22,8 @@ require 'libglade2'
 
 require 'about'
 require 'file_diag'
+require 'algorithm'
 
-$prog = nil
 
 class LocalizaGlade
 
@@ -102,7 +102,7 @@ end
 ####### methods for our control #########
 
 # flags controlling buttons
-class Flag
+class BtFlag
   # note that the value can have any type (we use boolean or integer)
   attr_reader :val
   
@@ -116,10 +116,10 @@ class Flag
   end
 end
 
-$file_ok = Flag.new(false)
-$started = Flag.new(false)
-$n_alg = Flag.new(0)
-$pap = Flag.new(false)
+$file_ok = BtFlag.new(false)
+$started = BtFlag.new(false)
+$n_alg = BtFlag.new(0)
+$pap = BtFlag.new(false)
 
 def update_bts
   $prog.glade['check_alg1'].sensitive =
@@ -141,7 +141,7 @@ $status_msg = {
 }
 
 def write_status_bar(ctx, msg_id)
-  sbar = $prog.glade['statusbar']
+  sbar = $prog.glade['main_statusbar']
   sbar.push(sbar.get_context_id(ctx), $status_msg[msg_id])
 end
 
@@ -155,6 +155,9 @@ if __FILE__ == $0
   w.show_all
 
   update_bts
+
+  $alg1 = Algorithm.new($prog.glade['draw_area1'], $prog.glade['statusbar_alg1'])
+  $alg2 = Algorithm.new($prog.glade['draw_area2'], $prog.glade['statusbar_alg2'])
   
   Gtk.main
 end
