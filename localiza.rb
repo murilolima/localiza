@@ -24,6 +24,26 @@ require 'about'
 require 'file_diag'
 require 'algorithm'
 
+# Joel ---------------------- start
+require 'lib/structures'
+require 'lib/painter'
+# Joel ---------------------- end
+
+class Reader
+  attr_reader :data
+
+  def initialize(file_name)
+    @data = File.open(file_name).read.to_s.split
+    @token_index = 0
+  end
+
+  def get_next_token
+    ret = @data[@token_index]
+    @token_index += 1
+    ret
+  end
+
+end
 
 class LocalizaGlade
 
@@ -52,8 +72,42 @@ end
 def open_diag_file
   OpenFileDialog.new.show do |fname|
     write_status_bar("open_file", :open_file_st)
-    # TODO tratar arquivo
-    puts File.new(fname).read.to_s # lembrar de fazer 'ensure f.close'
+
+    # Joel ---------------------- start
+    reader = Reader.new(fname)
+    $map = Map.new
+    $queries = Array.new
+
+    n_points = reader.get_next_token.to_i
+    n_edges = reader.get_next_token.to_i
+
+    n_points.times do
+      x = reader.get_next_token.to_f
+      y = reader.get_next_token.to_f
+      $map.add_point(Point.new(x,y)) 
+    end
+
+    n_edges.times do
+      point1_idx = reader.get_next_token.to_i
+      point2_idx = reader.get_next_token.to_i
+      $map.add_edge(point1_idx, point2_idx)
+    end
+
+    n_queries = reader.get_next_token.to_i
+
+    n_queries.times do
+      x = reader.get_next_token.to_f
+      y = reader.get_next_token.to_f
+      $queries << Point.new(x,y) 
+    end
+
+    $painter1 = Painter.new($map.points + $queries, $prog.glade['draw_area1'])
+    $painter2 = Painter.new($map.points + $queries, $prog.glade['draw_area1'])
+
+    $map.paint($painter1)
+    $map.paint($painter2)
+    # Joel ---------------------- end
+
     $file_ok.val = true
     # fim
     write_status_bar("open_file", :open_file_end)

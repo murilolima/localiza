@@ -1,6 +1,22 @@
+#!/usr/bin/env ruby -w
+# -*- coding: utf-8 -*-
+=begin
+* Name: rplac lib/point.rb tests
+* Description: this file contains the lib/structures.rb's tests 
+* Author: Joel Uchoa
+* Date: 2009-11-21
+* License:
+
+rplac 0.1, Copyright (C) 2009  Joel Uchoa, Murilo de Lima
+rplac comes with ABSOLUTELY NO WARRANTY; for detais see `gpl-2.0.txt'.
+This is free software, and you are welcome to redistribute it
+under certain conditions; see `gpl-2.0.txt' for details.
+
+=end
+
 require 'rubygems'
 require 'spec'
-require 'lib/point'
+require 'lib/structures'
 
 describe Point do
   
@@ -36,5 +52,21 @@ describe Point do
     c = a % b
     c.should == Point.new(3.2 * 3.91, 4.1 * 1.7)
   end
+
+end
+
+describe Vertex do
+
+end
+
+describe Edge do
+
+end
+
+describe Face do
+
+end
+
+describe DoubleConnectedEdgeList do
 
 end
