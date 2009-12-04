@@ -71,7 +71,6 @@ end
 
 def open_diag_file
   OpenFileDialog.new.show do |fname|
-    write_status_bar("open_file", :open_file_st)
 
     # Joel ---------------------- start
     reader = Reader.new(fname)
@@ -84,7 +83,7 @@ def open_diag_file
     n_points.times do
       x = reader.get_next_token.to_f
       y = reader.get_next_token.to_f
-      $map.add_point(Point.new(x,y)) 
+      $map.add_point(Point.new(x,y))
     end
 
     n_edges.times do
@@ -116,7 +115,6 @@ end
 
 def change_algorithm
   $row_alg.val = $prog.glade['combobox_alg'].active
-  puts "Escolhi algoritmo #{$row_alg.val}" # 0 = varredura, 1 = incremental
 end
 
 def toggle_step
@@ -124,25 +122,135 @@ def toggle_step
 end
 
 def change_speed
+  update_delay
 end
 
 def play_pause
-  $started.val = true
+  bt_active = $prog.glade['bt_play_pause'].active?
+  if $started.val
+    if bt_active # continuing
+      update_delay
+      $thread.wakeup
+    else # pausing
+      $delay = nil
+    end
+  else
+    if bt_active # this is necessary because finish fires play_pause
+      $started.val = true
+      update_delay
+      start_it_all
+    end
+  end
 end
 
 def stop
-  # TODO talvez mudar essas coisas de lugar, pois tambem precisa executá-las quando o algoritmo chega ao final por si só
-  $prog.glade['bt_play_pause'].active = false
-  $started.val = false
-  $last_part.val = false
+  finish
+  Thread.kill($thread)
 end
 
 def step
+  $mutex_pap.synchronize do
+    $cv_pap.signal
+  end
 end
 
 def next
-  $started.val = true
   $last_part.val = true
+
+  $mutex_jump.synchronize do
+    $jump = true
+  end
+
+  $prog.glade['bt_play_pause'].active = false # pauses if necessary; TODO só funciona se já tiver iniciado
+  
+  #unlocks the last step, if necessary
+  $mutex_pap.synchronize do
+    $cv_pap.signal
+  end
+
+  unless $started.val
+    $started.val = true
+    $delay = nil # say pause again; TODO muito feio!
+    start_it_all
+  end
+end
+
+
+####### algorithm thread control #########
+def update_delay
+  # We have a linear funcion for the FPS speed
+  #   with points (0, 1/5) - 5 seconds of delay -
+  #   and (100, 10) - 3x slower than a cartoon
+  # the delay is the inverse of that
+  speed = $prog.glade['speed_bar'].value
+  $delay = 1.0/(0.098*speed + 0.2) # TODO generalizar pra não precisar recalcular na mão
+end
+
+# TODO renomear estes métodos e colocar em outros arquivos
+def alg1
+  # must yield something not nil just before starting the second phase
+  5.times do
+    puts "Running one step of alg1"
+    yield nil
+  end
+  yield 1
+  5.times do
+    puts "Running one step of alg1 - second phase"
+    yield nil
+  end
+end
+
+def alg2
+  # must yield something not nil just before starting the second phase
+  5.times do
+    puts "Running one step of alg2"
+    yield nil
+  end
+end
+
+def run_alg(&blk)
+  case $row_alg.val
+    when 0
+    alg1(&blk)
+    when 1
+    alg2(&blk)
+  end
+end
+
+def start_it_all
+  $thread = Thread.new do
+    # TODO tratar passo a passo / fast forward
+    run_alg do |stage|
+      unless stage.nil? # second stage starts now
+        $last_part.val = true
+        $mutex_jump.synchronize do # stop jumping
+          $jump = false
+        end
+      end
+
+      unless $jump
+        if $pap.val
+          $mutex_pap.synchronize do
+            $cv_pap.wait($mutex_pap)
+          end
+        else
+          if $delay.nil?
+            sleep
+          else
+            sleep $delay
+          end
+        end
+      end
+    end
+    finish
+  end
+end
+
+def finish
+  $started.val = false
+  $last_part.val = false
+  $jump = false # just for certifying
+  $prog.glade['bt_play_pause'].active = false
 end
 
 
@@ -183,7 +291,6 @@ end
 
 # controlling status bar
 $status_msg = {
-  :open_file_st => "Lendo arquivo...",
   :open_file_end => "Arquivo lido com sucesso",
   :open_file_err => "Erro lendo arquivo"
 }
@@ -204,7 +311,12 @@ if __FILE__ == $0
 
   update_bts
 
-  $alg1 = Algorithm.new($prog.glade['draw_area1'], $prog.glade['statusbar_alg1'])
+  $mutex_pap = Mutex.new
+  $cv_pap = ConditionVariable.new
+  $mutex_jump = Mutex.new
+  $jump = false
+
+  $alg = Algorithm.new($prog.glade['draw_area1'], $prog.glade['statusbar_alg1'])
   
   Gtk.main
 end

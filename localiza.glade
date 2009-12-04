@@ -222,7 +222,7 @@ Incremental Probabil&#xED;stico - espa&#xE7;o esperado O(n)</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <property name="tooltip" translatable="yes">Pular para a pr&#xF3;xima etapa do algoritmo</property>
+                            <property name="tooltip" translatable="yes">Pular para a etapa de consultas</property>
                             <property name="use_stock">True</property>
                             <signal name="clicked" handler="next"/>
                           </widget>
@@ -297,7 +297,7 @@ Incremental Probabil&#xED;stico - espa&#xE7;o esperado O(n)</property>
                       <widget class="GtkHScale" id="speed_bar">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="adjustment">0 0 110 0 10 10</property>
+                        <property name="adjustment">1 1 110 0 10 10</property>
                         <property name="digits">0</property>
                         <property name="value_pos">left</property>
                         <signal name="value_changed" handler="change_speed"/>

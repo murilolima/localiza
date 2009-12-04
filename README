@@ -9,3 +9,5 @@
 =======
 Para executar:
    ruby -w localiza.rb
+ou
+   ./localiza.rb
