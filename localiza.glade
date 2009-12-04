@@ -126,28 +126,42 @@
                     <property name="visible">True</property>
                     <property name="orientation">vertical</property>
                     <child>
-                      <widget class="GtkCheckButton" id="check_alg1">
-                        <property name="label" translatable="yes">Algoritmo de Linha de Varredura - O(n&#xB2;) espa&#xE7;o</property>
+                      <widget class="GtkHBox" id="hbox2">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
-                        <property name="draw_indicator">True</property>
-                        <signal name="toggled" handler="toggle_alg1"/>
+                        <child>
+                          <widget class="GtkLabel" id="label_combo">
+                            <property name="visible">True</property>
+                            <property name="ypad">1</property>
+                            <property name="label" translatable="yes">Escolha um algoritmo:</property>
+                          </widget>
+                          <packing>
+                            <property name="padding">5</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <widget class="GtkComboBox" id="combobox_alg">
+                            <property name="visible">True</property>
+                            <property name="items" translatable="yes">Linha de Varredura - O(n&#xB2;) espa&#xE7;o
+Incremental Probabil&#xED;stico - espa&#xE7;o esperado O(n)</property>
+                            <signal name="changed" handler="change_algorithm"/>
+                          </widget>
+                          <packing>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
                       </widget>
                       <packing>
                         <property name="position">0</property>
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkCheckButton" id="check_alg2">
-                        <property name="label" translatable="yes">Algoritmo Incremental Probabil&#xED;stico - espa&#xE7;o esperado O(n)</property>
+                      <widget class="GtkHSeparator" id="hseparator3">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
-                        <property name="draw_indicator">True</property>
-                        <signal name="toggled" handler="toggle_alg2"/>
                       </widget>
                       <packing>
+                        <property name="expand">False</property>
+                        <property name="padding">5</property>
                         <property name="position">1</property>
                       </packing>
                     </child>

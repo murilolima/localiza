@@ -114,20 +114,9 @@ def open_diag_file
   end
 end
 
-def change_alg(bt_name)
-  if $prog.glade[bt_name].active?
-    $n_alg.val += 1
-  else
-    $n_alg.val -= 1
-  end
-end
-
-def toggle_alg1
-  change_alg('check_alg1')
-end
-
-def toggle_alg2
-  change_alg('check_alg2')
+def change_algorithm
+  $row_alg.val = $prog.glade['combobox_alg'].active
+  puts "Escolhi algoritmo #{$row_alg.val}" # 0 = varredura, 1 = incremental
 end
 
 def toggle_step
@@ -176,20 +165,20 @@ end
 
 $file_ok = BtFlag.new(false)
 $started = BtFlag.new(false)
-$n_alg = BtFlag.new(0)
+$row_alg = BtFlag.new(-1)
 $pap = BtFlag.new(false)
 $last_part = BtFlag.new(false)
 
 def update_bts
-  $prog.glade['check_alg1'].sensitive =
-    $prog.glade['check_alg2'].sensitive = !$started.val
-  $prog.glade['check_step'].sensitive = !$started.val && ($n_alg.val <= 1)
+  $prog.glade['label_combo'].sensitive =
+    $prog.glade['combobox_alg'].sensitive = !$started.val
+  $prog.glade['check_step'].sensitive = !$started.val
   $prog.glade['label_speed'].sensitive =
-    $prog.glade['speed_bar'].sensitive = !$pap.val || $n_alg.val == 2
-  $prog.glade['bt_play_pause'].sensitive = $file_ok.val && ($n_alg.val > 0) && !($started.val && $pap.val)
+    $prog.glade['speed_bar'].sensitive = !$pap.val
+  $prog.glade['bt_play_pause'].sensitive = $file_ok.val && ($row_alg.val != -1) && !($started.val && $pap.val)
   $prog.glade['bt_stop'].sensitive = $started.val
-  $prog.glade['bt_step'].sensitive = $started.val && ($n_alg.val == 1) && $pap.val
-  $prog.glade['bt_ff'].sensitive = $file_ok.val && ($n_alg.val > 0) && !$last_part.val
+  $prog.glade['bt_step'].sensitive = $started.val && $pap.val
+  $prog.glade['bt_ff'].sensitive = $file_ok.val && ($row_alg.val != -1) && !$last_part.val
 end    
 
 # controlling status bar
