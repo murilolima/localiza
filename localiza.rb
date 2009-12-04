@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby -w
+#!/usr/bin/ruby -w
 # -*- coding: utf-8 -*-
 #
 # This file is gererated by ruby-glade-create-template 1.1.4.
@@ -102,10 +102,10 @@ def open_diag_file
     end
 
     $painter1 = Painter.new($map.points + $queries, $prog.glade['draw_area1'])
-    $painter2 = Painter.new($map.points + $queries, $prog.glade['draw_area1'])
+#    $painter2 = Painter.new($map.points + $queries, $prog.glade['draw_area1'])
 
     $map.paint($painter1)
-    $map.paint($painter2)
+#    $map.paint($painter2)
     # Joel ---------------------- end
 
     $file_ok.val = true
@@ -216,7 +216,6 @@ if __FILE__ == $0
   update_bts
 
   $alg1 = Algorithm.new($prog.glade['draw_area1'], $prog.glade['statusbar_alg1'])
-  $alg2 = Algorithm.new($prog.glade['draw_area2'], $prog.glade['statusbar_alg2'])
   
   Gtk.main
 end

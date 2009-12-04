@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby -w
+#!/usr/bin/ruby -w
 # -*- coding: utf-8 -*-
 =begin
 * Name: rplac about dialog
