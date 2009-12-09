@@ -1,4 +1,4 @@
-#!/usr/bin/ruby -w
+#!/usr/bin/env ruby -w
 # -*- coding: utf-8 -*-
 =begin
 * Name: rplac painter class
@@ -31,7 +31,7 @@ WHITE	= Gdk::Color.new(0xFFFF,0xFFFF,0xFFFF)
 FUCHSIA = MAGENTA = Gdk::Color.new(0xFFFF,0x0000,0xFFFF)
 MAROON  = Gdk::Color.new(0x8800,0x0000,0x0000)
 RED	= Gdk::Color.new(0xFFFF,0x0000,0x0000)
-YELLOW= Gdk::Color.new(0xFFFF,0xFFFF,0x0000)
+YELLOW  = Gdk::Color.new(0xFFFF,0xFFFF,0x0000)
 
 
 class Painter
@@ -41,8 +41,17 @@ class Painter
   POINT_RADIO = 5
 
   def initialize(points, drawing_area)
+    #@drawing_area = Gtk::DrawingArea.new
+    #@drawing_area.set_size_request(@drawing_area.allocation.width, @drawing_area.allocation.height)
+    #@drawing_area.window = drawing_area.window
+    #@remote_drawing_area = drawing_area
     @drawing_area = drawing_area
     @style = @drawing_area.style.black_gc
+
+    clear_drawing_area
+    @drawing_area.signal_connect("expose_event") do
+      load_context
+    end
 
     # getting data for to calc scale and translate params
     @x_min = @y_min = Float::MAX
@@ -77,6 +86,8 @@ class Painter
 
   def clear_drawing_area
     @drawing_area.window.clear
+
+    save_context
   end
 
   def set_background_color(color)
@@ -91,10 +102,14 @@ class Painter
     set_foreground_color(color)
     center = scale_and_translate(center)
     @drawing_area.window.draw_arc(@style, true, center.x-radio, center.y-radio, 2*radio, 2*radio, 0, 64*360)
+
+    #save_context
   end
 
   def draw_point(point, color)
     draw_circle(point, POINT_RADIO, color)
+
+    #save_context
   end
 
   def draw_line(point1, point2, color)
@@ -102,6 +117,21 @@ class Painter
     point1 = scale_and_translate(point1)
     point2 = scale_and_translate(point2)
     @drawing_area.window.draw_line(@style, point1.x, point1.y, point2.x, point2.y)
+
+    #save_context
+  end
+
+  def save_context
+    alloc = @drawing_area.allocation
+    @context = @drawing_area.window.get_image(0,0,alloc.width,alloc.height)
+    puts @context.methods.sort
+  end
+
+  def load_context
+    alloc = @drawing_area.allocation
+    @drawing_area.window.draw_image(@style,@context,0,0,0,0,alloc.width,alloc.height)
+    #@remote_drawing_area.window.draw_image(@style,@context,0,0,0,0,alloc.width,alloc.height)
+    #@remote_drawing_area = @drawing_area.window
   end
 
 end

@@ -114,8 +114,30 @@ class DoubleConnectedEdgeList
   end
 
   def add_edge(vertex1_idx, vertex2_idx)
-    @edges << Edge.new(@vertexes[vertex1_idx], @vertexes[vertex2_idx])
-    #TODO
+    vertex_a = @vertexes[vertex1_idx]
+    vertex_b = @vertexes[vertex2_idx]
+
+    edge_a = Edge.new(vertex_a, vertex_b)
+    edge_b = edge_a.dual
+
+    @edges << edge_a
+    @edges << edge_b
+
+    iterator_edge_a = vertex_a.edges.insert(edge_a)
+    iterator_edge_b = vertex_b.edges.insert(edge_b)
+
+    edge_a.prev = iterator_edge_a.next_node.info.dual
+    iterator_edge_a.next_node.info.dual = edge_a
+
+    edge_a.next = iterator_edge_b.previous_node.info
+    iterator_edge_b.previous_node.info = edge_a
+
+    edge_b.prev = iterator_edge_b.next_node.info.dual
+    iterator_edge_b.next_node.info.dual = edge_b
+
+    edge_b.next = iterator_edge_a.previous_node.info
+    iterator_edge_a.previous_node.info = edge_b
+
   end
   
 end
@@ -131,17 +153,20 @@ class Map
 
   def add_point(point)
     @points << point
-    @structure.add_vertex(point)
   end
 
   def add_edge(point1_idx, point2_idx)
     @edges << [point1_idx, point2_idx]
-    @structure.add_edge(point1_idx, point2_idx)
+  end
+
+  def build_structures
+    @points.each { |p| @structure.add_vertex(p) }
+    @edges.each { |e| @structure.add_edge(e[0], e[1]) }
   end
 
   def paint(painter)
-    @points.each { |p| painter.draw_point(p, WHITE) }
-    @edges.each { |e| painter.draw_line(@points[e[0]], @points[e[1]], WHITE) }
+    @edges.each { |e| painter.draw_line(@points[e[0]], @points[e[1]], RED) }
+    @points.each { |p| painter.draw_point(p, BLUE) }
   end
 
 end
