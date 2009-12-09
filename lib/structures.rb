@@ -77,7 +77,7 @@ end
 
 class Edge
   include Comparable
-  attr_reader :origin, :dual
+  attr_reader :origin, :dual, :angle, :size
   attr_accessor :next, :prev, :face
   
   def initialize(origin, destination, dual = nil)
@@ -127,17 +127,39 @@ class DoubleConnectedEdgeList
     iterator_edge_b = vertex_b.edges.insert(edge_b)
 
     edge_a.prev = iterator_edge_a.next_node.info.dual
-    iterator_edge_a.next_node.info.dual = edge_a
+    iterator_edge_a.next_node.info.dual.next = edge_a
 
     edge_a.next = iterator_edge_b.previous_node.info
-    iterator_edge_b.previous_node.info = edge_a
+    iterator_edge_b.previous_node.info.prev = edge_a
 
     edge_b.prev = iterator_edge_b.next_node.info.dual
-    iterator_edge_b.next_node.info.dual = edge_b
+    iterator_edge_b.next_node.info.dual.next = edge_b
 
     edge_b.next = iterator_edge_a.previous_node.info
-    iterator_edge_a.previous_node.info = edge_b
+    iterator_edge_a.previous_node.info.prev = edge_b
 
+  end
+
+  def get_face_of_edge(edge_idx)
+    iterator = first = @edges[edge_idx]
+    vector = [first]
+    while iterator.next != first 
+      iterator = iterator.next
+      vector << iterator
+    end
+    vector
+  end
+
+  def debug(painter)
+    Thread.new do
+      @edges.each_with_index do |e,i| 
+        v = get_face_of_edge(i).map{ |e| e.origin.point }
+        STDERR.puts "FACES -----\n"+v.to_s
+        sleep 3
+        yield
+        painter.draw_polygon(v,i%2==0 ? BLUE : RED)
+      end
+    end
   end
   
 end
@@ -148,7 +170,6 @@ class Map
   def initialize
     @points = []
     @edges = []
-    @structure = DoubleConnectedEdgeList.new
   end
 
   def add_point(point)
@@ -160,13 +181,22 @@ class Map
   end
 
   def build_structures
+    @structure = DoubleConnectedEdgeList.new
     @points.each { |p| @structure.add_vertex(p) }
     @edges.each { |e| @structure.add_edge(e[0], e[1]) }
   end
 
   def paint(painter)
-    @edges.each { |e| painter.draw_line(@points[e[0]], @points[e[1]], RED) }
-    @points.each { |p| painter.draw_point(p, BLUE) }
+    painter.clear
+    @edges.each { |e| painter.draw_line(@points[e[0]], @points[e[1]], WHITE) }
+    @points.each { |p| painter.draw_point(p, WHITE) }
+
+    build_structures
+    @structure.debug(painter) do
+      painter.clear
+      @edges.each { |e| painter.draw_line(@points[e[0]], @points[e[1]], WHITE) }
+      @points.each { |p| painter.draw_point(p, WHITE) }
+    end
   end
 
 end

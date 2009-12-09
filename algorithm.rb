@@ -17,9 +17,8 @@ under certain conditions; see `gpl-2.0.txt' for details.
 
 class Algorithm
   
-  def initialize(draw_area, statusbar)
-    @draw_area = draw_area
-    @draw_area.modify_bg(Gtk::STATE_NORMAL, Gdk::Color.new(0, 0, 0))
+  def initialize(painter, statusbar)
+    @painter = painter
 
     @memory = 0
     @compar = 0

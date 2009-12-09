@@ -14,44 +14,36 @@ under certain conditions; see `gpl-2.0.txt' for details.
 
 =end
 
-require 'gtk2'
+require 'gnomecanvas2'
+require 'lib/structures'
 
-AQUA	= CYAN = Gdk::Color.new(0x0000,0xFFFF,0xFFFF)
-GREY	= Gdk::Color.new(0x8800,0x8800,0x8800)
-NAVY	= Gdk::Color.new(0x0000,0x0000,0x8800)
-SILVER  = Gdk::Color.new(0xCC00,0xCC00,0xCC00)
-BLACK	= Gdk::Color.new(0x0000,0x0000,0000)
-GREEN	= Gdk::Color.new(0x0000,0x8800,0000)
-OLIVE	= Gdk::Color.new(0x8800,0x8800,0x0000)
-TEAL	= Gdk::Color.new(0x0000,0x8800,0x8800)
-BLUE	= Gdk::Color.new(0x0000,0x0000,0xFFFF)
-LIME	= Gdk::Color.new(0x0000,0xFFFF,0x0000)
-PURPLE  = Gdk::Color.new(0x8800,0x0000,0x8800)
-WHITE	= Gdk::Color.new(0xFFFF,0xFFFF,0xFFFF)
-FUCHSIA = MAGENTA = Gdk::Color.new(0xFFFF,0x0000,0xFFFF)
-MAROON  = Gdk::Color.new(0x8800,0x0000,0x0000)
-RED	= Gdk::Color.new(0xFFFF,0x0000,0x0000)
-YELLOW  = Gdk::Color.new(0xFFFF,0xFFFF,0x0000)
+AQUA	= CYAN = '#00FFFF'
+GREY	= '#808080'
+NAVY	= '#000080'
+SILVER  = '#C0C0C0'
+BLACK	= '#000000'
+GREEN	= '#008000'
+OLIVE	= '#808000'
+TEAL	= '#008080'
+BLUE	= '#0000FF'
+LIME	= '#00FF00'
+PURPLE  = '#800080'
+WHITE	= '#FFFFFF'
+FUCHSIA = MAGENTA = '#FF00FF'
+MAROON  = '#800000'
+RED	= '#FF0000'
+YELLOW  = '#FFFF00'
 
 
 class Painter
-  attr_reader :drawing_area
 
   BORDER = 10
-  POINT_RADIO = 5
+  POINT_RADIO = 3
 
-  def initialize(points, drawing_area)
-    #@drawing_area = Gtk::DrawingArea.new
-    #@drawing_area.set_size_request(@drawing_area.allocation.width, @drawing_area.allocation.height)
-    #@drawing_area.window = drawing_area.window
-    #@remote_drawing_area = drawing_area
-    @drawing_area = drawing_area
-    @style = @drawing_area.style.black_gc
-
-    clear_drawing_area
-    @drawing_area.signal_connect("expose_event") do
-      load_context
-    end
+  def initialize(points, canvas)
+    @root = canvas.root
+    @width  = canvas.width
+    @height = canvas.height
 
     # getting data for to calc scale and translate params
     @x_min = @y_min = Float::MAX
@@ -66,72 +58,66 @@ class Painter
 
     x_diff = @x_max - @x_min + 1
     y_diff = @y_max - @y_min + 1
-    width  = @drawing_area.allocation.width - 2 * BORDER
-    height = @drawing_area.allocation.height - 2 * BORDER
+    w = @width - 2 * BORDER
+    h = @height - 2 * BORDER
 
-    @scale = [width/x_diff, height/y_diff].min # scale to fit points in drawing_area
+    @scale = [w/x_diff, h/y_diff].min # scale to fit points in drawing_area
 
     x_center = (@x_min + @x_max) * 0.5
     y_center = (@y_min + @y_max) * 0.5
 
     # offset to position the scaled points
-    @x_offset = width * 0.5 - x_center * @scale + BORDER
-    @y_offset = height * 0.5 - y_center * @scale + BORDER
+    @x_offset = w * 0.5 - x_center * @scale + BORDER
+    @y_offset = h * 0.5 - y_center * @scale + BORDER
 
+    clear
   end
 
   def scale_and_translate(point)
-    ((point * @scale) + Point.new(@x_offset, @y_offset))
+    p = ((point * @scale) + Point.new(@x_offset, @y_offset))
+    Point.new(p.x, @height - BORDER - p.y) # convert the origin for left-botton
   end
 
-  def clear_drawing_area
-    @drawing_area.window.clear
-
-    save_context
-  end
-
-  def set_background_color(color)
-    @style.rgb_bg_color = color
-  end
-
-  def set_foreground_color(color)
-    @style.rgb_fg_color = color
+  def clear
+    Gnome::CanvasRect.new(@root, 
+                     :x1 => 0, :y1 => 0,
+                     :x2 => @width, :y2 => @height,
+                     :fill_color => BLACK,
+                     :width_units => 1.0)
   end
 
   def draw_circle(center, radio, color)
-    set_foreground_color(color)
-    center = scale_and_translate(center)
-    @drawing_area.window.draw_arc(@style, true, center.x-radio, center.y-radio, 2*radio, 2*radio, 0, 64*360)
+    center = scale_and_translate(center) - Point.new(radio,radio)
+    Gnome::CanvasEllipse.new(@root,
+                            :x1 => center.x, :y1 => center.y,
+                            :x2 => center.x+2*radio, :y2 => center.y+2*radio,
+                            :fill_color => color,
+                            :width_units => 1.0)
 
-    #save_context
   end
 
   def draw_point(point, color)
     draw_circle(point, POINT_RADIO, color)
-
-    #save_context
   end
 
   def draw_line(point1, point2, color)
-    set_foreground_color(color)
     point1 = scale_and_translate(point1)
     point2 = scale_and_translate(point2)
-    @drawing_area.window.draw_line(@style, point1.x, point1.y, point2.x, point2.y)
-
-    #save_context
+    Gnome::CanvasLine.new(@root,
+                         :points => [[point1.x,point1.y], [point2.x, point2.y]],
+                         :fill_color => color,
+                         :width_units => 1.0)
   end
 
-  def save_context
-    alloc = @drawing_area.allocation
-    @context = @drawing_area.window.get_image(0,0,alloc.width,alloc.height)
-    puts @context.methods.sort
-  end
-
-  def load_context
-    alloc = @drawing_area.allocation
-    @drawing_area.window.draw_image(@style,@context,0,0,0,0,alloc.width,alloc.height)
-    #@remote_drawing_area.window.draw_image(@style,@context,0,0,0,0,alloc.width,alloc.height)
-    #@remote_drawing_area = @drawing_area.window
+  def draw_polygon(points, edges_color, fill_color = BLACK, points_color = WHITE, draw_points = false)
+    points = points.map { |p| scale_and_translate(p) } 
+    ps = points.map { |p| [p.x,p.y] } 
+    Gnome::CanvasPolygon.new(@root,
+                             :points => ps,
+                             :fill_color => fill_color,
+                             :outline_color => edges_color,
+                             :width_units => 1.0)
+    points.each { |p| dras_point(p, points_color) } if draw_points
   end
 
 end

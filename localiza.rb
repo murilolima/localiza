@@ -19,6 +19,7 @@ under certain conditions; see `gpl-2.0.txt' for details.
 =end
 
 require 'libglade2'
+require 'gnomecanvas2'
 
 require 'about'
 require 'file_diag'
@@ -27,33 +28,53 @@ require 'algorithm'
 # Joel ---------------------- start
 require 'lib/structures'
 require 'lib/painter'
+require 'lib/reader'
 # Joel ---------------------- end
-
-class Reader
-  attr_reader :data
-
-  def initialize(file_name)
-    @data = File.open(file_name).read.to_s.split
-    @token_index = 0
-  end
-
-  def get_next_token
-    ret = @data[@token_index]
-    @token_index += 1
-    ret
-  end
-
-end
 
 class LocalizaGlade
 
   include GetText
 
   attr :glade
-  
+  attr_accessor :canvas
+
   def initialize(path_or_data, root = nil, domain = nil, localedir = nil, flag = GladeXML::FILE)
     bindtextdomain(domain, localedir, nil, 'UTF-8')
     @glade = GladeXML.new(path_or_data, root, domain, localedir, flag) {|handler| method(handler)}
+
+    w = @glade['main_window']
+    w.signal_connect('destroy') { |w| gtk_main_quit(w) }
+    w.show_all
+  end
+
+  def gtk_main_quit(widget)
+    Gtk.main_quit
+  end
+
+  def change_drawing_widget
+    drawing_area = @glade['draw_area1']
+    parent = drawing_area.parent
+    
+    width = drawing_area.allocation.width
+    height = drawing_area.allocation.height
+
+    @canvas = Gnome::Canvas.new(true)
+    @canvas.set_size_request(width,height)
+    @canvas.set_scroll_region(0,0,width,height)
+    Gnome::CanvasRect.new(@canvas.root, 
+                     :x1 => 0, :y1 => 0,
+                     :x2 => width, :y2 => height,
+                     :fill_color => BLACK,
+                     :width_units => 1.0)
+
+    parent.remove(drawing_area)
+    parent.add(@canvas)
+
+    bar = @glade['statusbar_alg1']
+    parent.remove(bar)
+    parent.add(bar)
+
+    parent.show_all
   end
 
 end
@@ -61,9 +82,6 @@ end
 
 ####### methods for GTK stuff #########
 
-def gtk_main_quit(widget)
-  Gtk.main_quit
-end
 
 def open_diag_about
   AboutDialog.new.show
@@ -73,38 +91,11 @@ def open_diag_file
   OpenFileDialog.new.show do |fname|
 
     # Joel ---------------------- start
-    reader = Reader.new(fname)
-    $map = Map.new
-    $queries = Array.new
+    $map, $queries = Reader.read(fname)
 
-    n_points = reader.get_next_token.to_i
-    n_edges = reader.get_next_token.to_i
-
-    n_points.times do
-      x = reader.get_next_token.to_f
-      y = reader.get_next_token.to_f
-      $map.add_point(Point.new(x,y))
-    end
-
-    n_edges.times do
-      point1_idx = reader.get_next_token.to_i
-      point2_idx = reader.get_next_token.to_i
-      $map.add_edge(point1_idx, point2_idx)
-    end
-
-    n_queries = reader.get_next_token.to_i
-
-    n_queries.times do
-      x = reader.get_next_token.to_f
-      y = reader.get_next_token.to_f
-      $queries << Point.new(x,y) 
-    end
-
-    $painter1 = Painter.new($map.points + $queries, $prog.glade['draw_area1'])
-#    $painter2 = Painter.new($map.points + $queries, $prog.glade['draw_area1'])
+    $painter1 = Painter.new($map.points + $queries, $prog.canvas)
 
     $map.paint($painter1)
-#    $map.paint($painter2)
     # Joel ---------------------- end
 
     $file_ok.val = true
@@ -162,7 +153,7 @@ def next
   end
 
   $prog.glade['bt_play_pause'].active = false # pauses if necessary; TODO só funciona se já tiver iniciado
-  
+
   #unlocks the last step, if necessary
   $mutex_pap.synchronize do
     $cv_pap.signal
@@ -210,9 +201,9 @@ end
 
 def run_alg(&blk)
   case $row_alg.val
-    when 0
+  when 0
     alg1(&blk)
-    when 1
+  when 1
     alg2(&blk)
   end
 end
@@ -260,7 +251,7 @@ end
 class BtFlag
   # note that the value can have any type (we use boolean or integer)
   attr_reader :val
-  
+
   def initialize(new_val)
     @val = new_val
   end
@@ -278,11 +269,9 @@ $pap = BtFlag.new(false)
 $last_part = BtFlag.new(false)
 
 def update_bts
-  $prog.glade['label_combo'].sensitive =
-    $prog.glade['combobox_alg'].sensitive = !$started.val
+  $prog.glade['label_combo'].sensitive = $prog.glade['combobox_alg'].sensitive = !$started.val
   $prog.glade['check_step'].sensitive = !$started.val
-  $prog.glade['label_speed'].sensitive =
-    $prog.glade['speed_bar'].sensitive = !$pap.val
+  $prog.glade['label_speed'].sensitive = $prog.glade['speed_bar'].sensitive = !$pap.val
   $prog.glade['bt_play_pause'].sensitive = $file_ok.val && ($row_alg.val != -1) && !($started.val && $pap.val)
   $prog.glade['bt_stop'].sensitive = $started.val
   $prog.glade['bt_step'].sensitive = $started.val && $pap.val
@@ -305,9 +294,6 @@ if __FILE__ == $0
   PROG_PATH = 'localiza.glade'
   PROG_NAME = 'POINT_LOCATION'
   $prog = LocalizaGlade.new(PROG_PATH, nil, PROG_NAME)
-  w = $prog.glade['main_window']
-  w.signal_connect('destroy') { |w| gtk_main_quit(w) }
-  w.show_all
 
   update_bts
 
@@ -316,7 +302,10 @@ if __FILE__ == $0
   $mutex_jump = Mutex.new
   $jump = false
 
-  $alg = Algorithm.new($prog.glade['draw_area1'], $prog.glade['statusbar_alg1'])
-  
+
+  $prog.change_drawing_widget
+
+  $alg = Algorithm.new($prog.canvas, $prog.glade['statusbar_alg1'])
+
   Gtk.main
 end
