@@ -25,7 +25,7 @@ class Point
   attr_reader :x, :y
 
   def initialize(x=0, y=0)
-    @x, @y = x.to_f, y.to_f
+    @x, @y = x.to_i, y.to_i
   end
 
   def +(other)
@@ -191,12 +191,12 @@ class Map
     @edges.each { |e| painter.draw_line(@points[e[0]], @points[e[1]], WHITE) }
     @points.each { |p| painter.draw_point(p, WHITE) }
 
-    build_structures
-    @structure.debug(painter) do
-      painter.clear
-      @edges.each { |e| painter.draw_line(@points[e[0]], @points[e[1]], WHITE) }
-      @points.each { |p| painter.draw_point(p, WHITE) }
-    end
+    #build_structures
+    #@structure.debug(painter) do
+    #  painter.clear
+    #  @edges.each { |e| painter.draw_line(@points[e[0]], @points[e[1]], WHITE) }
+    #  @points.each { |p| painter.draw_point(p, WHITE) }
+    #end
   end
 
 end

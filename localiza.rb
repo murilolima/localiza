@@ -29,6 +29,7 @@ require 'algorithm'
 require 'lib/structures'
 require 'lib/painter'
 require 'lib/reader'
+require 'lib/simple_algorithm'
 # Joel ---------------------- end
 
 class LocalizaGlade
@@ -96,6 +97,8 @@ def open_diag_file
     $painter1 = Painter.new($map.points + $queries, $prog.canvas)
 
     $map.paint($painter1)
+    simple = Simple.new($map)
+    simple.build_grid($painter1)
     # Joel ---------------------- end
 
     $file_ok.val = true

@@ -36,6 +36,7 @@ YELLOW  = '#FFFF00'
 
 
 class Painter
+  attr_reader :wigth, :height
 
   BORDER = 10
   POINT_RADIO = 3
