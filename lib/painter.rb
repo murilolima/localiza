@@ -36,21 +36,22 @@ YELLOW  = '#FFFF00'
 
 
 class Painter
-  attr_reader :wigth, :height
+  attr_reader :wigth, :height, :minus_inf, :plus_inf, :x1bd, :x2bd, :y1bd, :y2bd
 
   BORDER = 10
   POINT_RADIO = 3
 
   def initialize(points, canvas)
-    @root = canvas.root
+    @canvas = canvas
+    @root = nil
     @width  = canvas.width
     @height = canvas.height
 
     # getting data for to calc scale and translate params
-    @x_min = @y_min = Float::MAX
-    @x_max = @y_max = Float::MIN
+    @x_min = @x_max = points[0].x
+    @y_min = @y_max = points[0].y
 
-    points.each do |p| 
+    points.each do |p|
       @x_min = [@x_min, p.x].min
       @x_max = [@x_max, p.x].max
       @y_min = [@y_min, p.y].min
@@ -71,6 +72,14 @@ class Painter
     @x_offset = w * 0.5 - x_center * @scale + BORDER
     @y_offset = h * 0.5 - y_center * @scale + BORDER
 
+    @minus_inf = @x_min - BORDER
+    @plus_inf = [@x_max, @y_max].max + BORDER
+
+    @x1bd = @x_min - BORDER
+    @x2bd = @x_max + BORDER
+    @y1bd = @y_min - BORDER
+    @y2bd = @y_max + BORDER
+
     clear
   end
 
@@ -80,9 +89,12 @@ class Painter
   end
 
   def clear
+    @root.destroy unless @root.nil?
+    @root = Gnome::CanvasGroup.new(@canvas.root)
+    
     Gnome::CanvasRect.new(@root, 
                      :x1 => 0, :y1 => 0,
-                     :x2 => @width, :y2 => @height,
+                      :x2 => @width, :y2 => @height,
                      :fill_color => BLACK,
                      :width_units => 1.0)
   end
@@ -118,7 +130,7 @@ class Painter
                              :fill_color => fill_color,
                              :outline_color => edges_color,
                              :width_units => 1.0)
-    points.each { |p| dras_point(p, points_color) } if draw_points
+    #points.each { |p| draw_point(p, points_color) } if draw_points
   end
 
 end

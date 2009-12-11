@@ -23,14 +23,12 @@ require 'gnomecanvas2'
 
 require 'about'
 require 'file_diag'
-require 'algorithm'
 
-# Joel ---------------------- start
 require 'lib/structures'
 require 'lib/painter'
 require 'lib/reader'
 require 'lib/simple_algorithm'
-# Joel ---------------------- end
+require 'lib/rand_algorithm'
 
 class LocalizaGlade
 
@@ -53,11 +51,8 @@ class LocalizaGlade
   end
 
   def change_drawing_widget
-    drawing_area = @glade['draw_area1']
-    parent = drawing_area.parent
-    
-    width = drawing_area.allocation.width
-    height = drawing_area.allocation.height
+    parent = @glade['draw_box']
+    width, height = 800, 600
 
     @canvas = Gnome::Canvas.new(true)
     @canvas.set_size_request(width,height)
@@ -68,11 +63,9 @@ class LocalizaGlade
                      :fill_color => BLACK,
                      :width_units => 1.0)
 
-    parent.remove(drawing_area)
     parent.add(@canvas)
 
-    bar = @glade['statusbar_alg1']
-    parent.remove(bar)
+    bar = @glade['statusbar_alg']
     parent.add(bar)
 
     parent.show_all
@@ -90,20 +83,25 @@ end
 
 def open_diag_file
   OpenFileDialog.new.show do |fname|
+    begin
+      $map, $queries = Reader.read(fname)
+      $painter = Painter.new($map.points + $queries, $prog.canvas)
+      $map.paint($painter)
+      $map.build_structure
 
-    # Joel ---------------------- start
-    $map, $queries = Reader.read(fname)
-
-    $painter1 = Painter.new($map.points + $queries, $prog.canvas)
-
-    $map.paint($painter1)
-    simple = Simple.new($map)
-    simple.build_grid($painter1)
-    # Joel ---------------------- end
-
-    $file_ok.val = true
-    # fim
-    write_status_bar("open_file", :open_file_end)
+      $file_ok.val = true
+      write_status_bar(:open_file_end)
+    rescue Exception => error
+      puts error
+      dialog = Gtk::MessageDialog.new($prog.glade['main_window'],
+                                Gtk::Dialog::DESTROY_WITH_PARENT,
+                                Gtk::MessageDialog::ERROR,
+                                Gtk::MessageDialog::BUTTONS_CLOSE,
+                                "Erro lendo arquivo '%s'" % fname)
+      dialog.run
+      dialog.destroy
+      write_status_bar(:open_file_err)
+    end
   end
 end
 
@@ -173,33 +171,43 @@ end
 ####### algorithm thread control #########
 def update_delay
   # We have a linear funcion for the FPS speed
-  #   with points (0, 1/5) - 5 seconds of delay -
-  #   and (100, 10) - 3x slower than a cartoon
+  #   with points (0, min) - 3 seconds of delay -
+  #   and (100, max) - as fast as a cartoon
   # the delay is the inverse of that
+  min = 1/3.0; max = 30.0
   speed = $prog.glade['speed_bar'].value
-  $delay = 1.0/(0.098*speed + 0.2) # TODO generalizar pra não precisar recalcular na mão
+  $delay = 1.0/(speed*(max-min)/100.0 + min) # TODO generalizar pra não precisar recalcular na mão
 end
 
 # TODO renomear estes métodos e colocar em outros arquivos
 def alg1
-  # must yield something not nil just before starting the second phase
-  5.times do
-    puts "Running one step of alg1"
+  simple = Simple.new($map, $painter, $prog.glade['statusbar_alg'], $prog.glade['main_statusbar'])
+  simple.build_grid do
     yield nil
   end
   yield 1
-  5.times do
-    puts "Running one step of alg1 - second phase"
-    yield nil
+  $queries.each do |p|
+    simple.query(p) do
+      yield nil
+    end
   end
+rescue Exception => error
+  puts error
 end
 
 def alg2
-  # must yield something not nil just before starting the second phase
-  5.times do
-    puts "Running one step of alg2"
+  rand = Randomized.new($map, $painter, $prog.glade['statusbar_alg'], $prog.glade['main_statusbar'])
+  rand.build_struct do
     yield nil
   end
+  yield 1
+  $queries.each do |p|
+    rand.query(p) do
+      yield nil
+    end
+  end
+rescue Exception => error
+  puts error
 end
 
 def run_alg(&blk)
@@ -213,7 +221,6 @@ end
 
 def start_it_all
   $thread = Thread.new do
-    # TODO tratar passo a passo / fast forward
     run_alg do |stage|
       unless stage.nil? # second stage starts now
         $last_part.val = true
@@ -245,6 +252,8 @@ def finish
   $last_part.val = false
   $jump = false # just for certifying
   $prog.glade['bt_play_pause'].active = false
+
+  $prog.glade['main_statusbar'].push(0, "Pronto")
 end
 
 
@@ -287,9 +296,9 @@ $status_msg = {
   :open_file_err => "Erro lendo arquivo"
 }
 
-def write_status_bar(ctx, msg_id)
+def write_status_bar(msg_id)
   sbar = $prog.glade['main_statusbar']
-  sbar.push(sbar.get_context_id(ctx), $status_msg[msg_id])
+  sbar.push(0, $status_msg[msg_id])
 end
 
 # Main program
@@ -307,8 +316,6 @@ if __FILE__ == $0
 
 
   $prog.change_drawing_widget
-
-  $alg = Algorithm.new($prog.canvas, $prog.glade['statusbar_alg1'])
 
   Gtk.main
 end

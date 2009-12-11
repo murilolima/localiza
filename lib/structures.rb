@@ -53,8 +53,8 @@ class Point
   end
 
   def <=>(other)
-    return x < other.x ? -1 : 1 if (x - other.x).abs >= EPS
-    return y < other.y ? -1 : 1 if (y - other.y).abs >= EPS
+    return x < other.x ? -1 : 1 if x != other.x
+    return y < other.y ? -1 : 1 if y != other.y
     return 0
   end
 
@@ -165,7 +165,7 @@ class DoubleConnectedEdgeList
 end
 
 class Map
-  attr_reader :points, :edges
+  attr_reader :points, :edges, :structure
   
   def initialize
     @points = []
@@ -180,7 +180,7 @@ class Map
     @edges << [point1_idx, point2_idx]
   end
 
-  def build_structures
+  def build_structure
     @structure = DoubleConnectedEdgeList.new
     @points.each { |p| @structure.add_vertex(p) }
     @edges.each { |e| @structure.add_edge(e[0], e[1]) }
@@ -188,15 +188,8 @@ class Map
 
   def paint(painter)
     painter.clear
-    @edges.each { |e| painter.draw_line(@points[e[0]], @points[e[1]], WHITE) }
-    @points.each { |p| painter.draw_point(p, WHITE) }
-
-    #build_structures
-    #@structure.debug(painter) do
-    #  painter.clear
-    #  @edges.each { |e| painter.draw_line(@points[e[0]], @points[e[1]], WHITE) }
-    #  @points.each { |p| painter.draw_point(p, WHITE) }
-    #end
+    @edges.each { |e| painter.draw_line(@points[e[0]], @points[e[1]], GREY) }
+    @points.each { |p| painter.draw_point(p, GREY) }
   end
 
 end

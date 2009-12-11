@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 require 'lib/structures'
 
 class Reader
@@ -5,6 +6,7 @@ class Reader
   private
   def initialize(file_name)
     file = File.open(file_name)
+    raise unless file
     @data = file.read.to_s.split
     @token_index = 0
   ensure
@@ -19,7 +21,7 @@ class Reader
   end
 
   def self.read(fname)
-
+    # TODO levantar excecao se entrada nao for válida
     reader = Reader.new(fname)
     map = Map.new
     queries = Array.new

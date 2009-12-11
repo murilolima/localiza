@@ -1,11 +1,11 @@
+# -*- coding: utf-8 -*-
 require 'rubygems'
 require 'rbtree'
 require 'lib/structures'
 require 'lib/painter'
+require 'lib/algorithm'
 
-class Simple 
-
-  INF = 1<<30
+class Simple < Algorithm
 
   class Element
     include Comparable
@@ -34,75 +34,142 @@ class Simple
     def to_s
       idx.to_s + " " + @edge[0].to_s + " " + @edge[1].to_s
     end
-
   end
 
-  def initialize(map)
-    @map = map
-  end
+  def build_grid
+    @map.paint(@painter)
+    yield
 
-  def get_y(point1, point2, x) # TODO: conferir
-    v1 = x - point1.x
-    v2 = point2.x - x
+    @mainbar.push(0, "Construindo estrutura de dados... ordenando pontos-eventos")
 
-    return point1.y if v1 + v2 == 0
+    events = @map.points.dup # O(n)
+    events << Point.new(@painter.plus_inf, @painter.plus_inf)
+    events.sort! do |a, b|
+      l1 = @painter.draw_line(Point.new(a.x,@painter.minus_inf), Point.new(a.x,@painter.plus_inf), YELLOW)
+      p1 = @painter.draw_point(a, RED)
+      l2 = @painter.draw_line(Point.new(b.x,@painter.minus_inf), Point.new(b.x,@painter.plus_inf), YELLOW)
+      p2 = @painter.draw_point(b, RED)
+      yield
+      l1.destroy; l2.destroy
+      p1.destroy; p2.destroy
+      a <=> b
+    end
 
-    (point1.y * v2 + point2.y & v1) / (v1 + v2)
-  end
-
-  def build_grid(painter)
-    events = @map.points.map{ |p| p.x } # O(n)
-    events << INF
-    events.sort! # O(n*lg(n))
-    events.uniq! # O(n) # acho que comentando isso ja funciona pra arestas verticais
+    @mainbar.push(0, "Construindo estrutura de dados... ordenando arestas pela ponta mais à esquerda")
 
     ordered_edges = []
     edges = @map.edges.map {|e| [@map.points[e[0]],@map.points[e[1]]] }
     edges.each_with_index { |e,i| ordered_edges << Element.new(e,i) }
     ordered_edges.sort! do |a,b|
+      e1 = @painter.draw_line(a.edge[0], a.edge[1], LIME)
+      e2 = @painter.draw_line(b.edge[0], b.edge[1], LIME)
+      yield
+      e1.destroy; e2.destroy
       a.edge[0] <=> b.edge[0]
     end
     index = 0;
-    ordered_edges.each{ |e| puts e }
+
+    @mainbar.push(0, "Construindo estrutura de dados...")
 
     linesweep = RBTree.new
 
-    grid = RBTree.new
+    @grid = RBTree.new
 
-    Thread.new do
-      events.each do |x|
-        #@map.paint(painter)
+    last_line = nil
+    events.each do |p|
+      yell = @painter.draw_line(Point.new(p.x,@painter.minus_inf), Point.new(p.x,@painter.plus_inf), YELLOW)
+      redp = @painter.draw_point(p, RED)
+      yield
 
-        painter.draw_line(Point.new(x,-10), Point.new(x,20), YELLOW)
-        sleep 1
-
-        #linesweep.keys.each { |e| STDERR.puts "L "+e.to_s; painter.draw_line(e.edge[0],e.edge[1],GREY); sleep 1 }
-        order = linesweep.keys.sort do |a,b| # ordenado faixa
-          ya = get_y(a.edge[0],a.edge[1],x)
-          yb = get_y(b.edge[0],b.edge[1],x)
-          ya <=> yb
-        end
-        grid[x] = order # adicionado faixa que limita superiormente por 'x'
-        order.each { |e| STDERR.puts "O "+e.to_s; painter.draw_line(e.edge[0],e.edge[1],LIME); sleep 1 }
-
-        while index < ordered_edges.size # adicionando arestas entrando na faixa
-          break if ordered_edges[index].edge[0].x > x
-          STDERR.puts "I "+ordered_edges[index].to_s
-          linesweep[ordered_edges[index]] = 1 # o valor 1 eh apenas para efetuar a insercao
-          index += 1
-        end
-
-        while linesweep.first != nil and linesweep.first[0].edge[1].x <= x # removendo as aresta que sairam da faixa
-          STDERR.puts "D "+linesweep.first[0].to_s
-          linesweep.delete(linesweep.first[0])
+      order = linesweep.keys.sort do |a,b| # ordenado faixa
+        e1 = @painter.draw_line(a.edge[0], a.edge[1], BLUE)
+        e2 = @painter.draw_line(b.edge[0], b.edge[1], BLUE)
+        yield
+        e1.destroy; e2.destroy
+        if (right(a.edge[0], a.edge[1], b.edge[0]) and right(a.edge[0], a.edge[1], b.edge[1])) or
+          (left(b.edge[0], b.edge[1], a.edge[0]) and left(b.edge[0], b.edge[1], a.edge[1]))
+          1
+        else
+          -1
         end
       end
-    end
+      @grid[p] = order # adicionado faixa que limita superiormente por 'x'
 
+      while index < ordered_edges.size # adicionando arestas entrando na faixa
+        e = ordered_edges[index]
+        break if e.edge[0] > p
+        linesweep[e] = @painter.draw_line(e.edge[0],e.edge[1], LIME)
+        yield
+        index += 1
+      end
+
+      while linesweep.first != nil and (e = linesweep.first[0]).edge[1] <= p # removendo as aresta que sairam da faixa
+        linesweep.first[1].destroy
+        linesweep.delete(e)
+        yield
+      end
+
+      last_line.destroy unless last_line.nil?
+      last_line = yell
+      redp.destroy
+    end
   end
 
   def query(point)
+    @mainbar.push(0, "Buscando ponto #{point}...")
+    pred = @painter.draw_point(point, RED)
+    yield
 
+    pivot, stripe = @grid.lower_bound(point) # TODO pintar arestas na busca (criar classe)
+    
+    if pivot == point
+      puts "sobre o ponto"
+    elsif stripe.size == 0
+      puts "FORA!"
+      # ponto estah fora de todas as regioes
+    else
+      lower = 0; upper = (stripe.size) -1
+
+      x1 = stripe.first.edge[0]
+      y1 = stripe.first.edge[1]
+      l1 = @painter.draw_line(x1, y1, LIME)
+      yield
+      l1.destroy
+      x2 = stripe.last.edge[0]
+      y2 = stripe.last.edge[1]
+      l2 = @painter.draw_line(x2, y2, LIME)
+      l2.destroy
+      yield
+      if rights(x1, y1, point) or lefts(x2, y2, point)
+        puts "fora"
+      else
+        while lower < upper -1
+          mid = (lower + upper) / 2
+          e = stripe[mid].edge
+          edge = @painter.draw_line(e[0],e[1], LIME)
+          yield
+          edge.destroy
+          if right(e[0], e[1], point)
+            upper = mid
+          else
+            lower = mid
+          end
+        end
+
+        if (area2(stripe[lower].edge[0], stripe[lower].edge[1], point) == 0) or
+          (area2(stripe[upper].edge[0], stripe[upper].edge[1], point) == 0)
+          puts "sobre a aresta"
+        else
+          face_points = @map.structure.get_face_of_edge(stripe[lower].idx).map { |e| e.origin.point }
+          poly = @painter.draw_polygon(face_points, LIME, GREY)
+          pred.destroy
+          pred = @painter.draw_point(point, RED)
+          yield
+          poly.destroy
+        end
+      end
+    end
+    pred.destroy
   end
 
 end
