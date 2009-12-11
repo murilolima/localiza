@@ -100,9 +100,11 @@ class Randomized < Algorithm
     traps = [@tree.find_trapezoid(e)]
 
     while e[1].x > (lt = traps.last).data.rightp.x
+      lines = draw_trapezoid(lt.data, BLUE)
       pt = @painter.draw_point(lt.data.rightp, RED)
       yield
       pt.destroy
+      destroy_trapezoid(lines)
       if right(e[0], e[1], lt.data.rightp)
         traps << lt.data.brn
       else
@@ -111,6 +113,21 @@ class Randomized < Algorithm
     end
 
     traps
+  end
+
+  def draw_trapezoid(trap, color)
+    l1 = @painter.draw_line(Point.new(trap.leftp.x, @painter.minus_inf), Point.new(trap.leftp.x, @painter.plus_inf), color)
+    l2 = @painter.draw_line(Point.new(trap.rightp.x, @painter.minus_inf), Point.new(trap.rightp.x, @painter.plus_inf), color)
+    l3 = @painter.draw_line(trap.bottom[0], trap.bottom[1], color)
+    l4 = @painter.draw_line(trap.top[0], trap.top[1], color)
+
+    [l1, l2, l3, l4]
+  end
+
+  def destroy_trapezoid(lines)
+    lines.each do |l|
+      l.destroy
+    end
   end
 
   def build_struct
@@ -139,11 +156,16 @@ class Randomized < Algorithm
       line = @painter.draw_line(e[0], e[1], LIME)
       yield
       traps = follow_segment(e)
+      puts traps.size.to_s + " traps"
 
       i = 0
       trap = traps[i]
       pi = Node.new(:POINT, e[0])
       a = Node.new(:TRAP, Trapezoid.new(trap.data.leftp, e[0], trap.data.top, trap.data.bottom))
+      lines = draw_trapezoid(a.data, MAGENTA)
+      yield
+      destroy_trapezoid(lines)
+      
       a.parents = [pi]
       pi.left = a
       pi.right = trap
@@ -164,7 +186,9 @@ class Randomized < Algorithm
       c.data.uln = d.data.urn = a
 
       a.data.uln = trap.data.uln
+      trap.data.uln.urn = a unless trap.data.uln.nil?
       a.data.bln = trap.data.bln
+      trap.data.bln.brn = a unless trap.data.bln.nil?
       a.data.urn = c
       a.data.brn = d
 
@@ -190,16 +214,40 @@ class Randomized < Algorithm
           c1 = c
           c = Node.new(:TRAP, Trapezoid.new(trap.data.rightp, nil, trap.data.top, e))
           c.parents = []
-          c1.data.urn = c
-          c.data.uln = c1
+          c1.data.brn = c
+          c.data.bln = c1
+          unless trap.data.urn.nil?
+            c1.data.urn = trap.data.urn
+            trap.data.urn.uln = c1
+          end
+          unless trap.data.uln.nil?
+            c.data.uln = trap.data.uln
+            trap.data.uln.urn = c
+          end
+
+          lines = draw_trapezoid(c1.data, MAGENTA)
+          yield
+          destroy_trapezoid(lines)
         else
           # fecha o D
           d.data.rightp = trap.data.rightp
           d1 = d
           d = Node.new(:TRAP, Trapezoid.new(trap.data.rightp, nil, e, trap.data.bottom))
           d.parents = []
-          d1.data.brn = d
-          d.data.bln = d1
+          d1.data.urn = d
+          d.data.uln = d1
+          unless trap.data.brn.nil?
+            d1.data.brn = trap.data.brn
+            trap.data.brn.bln = d1
+          end
+          unless trap.data.bln.nil?
+            d.data.bln = trap.data.bln
+            trap.data.bln.brn = d
+          end
+
+          lines = draw_trapezoid(d1.data, MAGENTA)
+          yield
+          destroy_trapezoid(lines)
         end
 
         i = i+1
@@ -214,9 +262,20 @@ class Randomized < Algorithm
       si.right = d
 
       c.data.rightp = e[1]
+      lines = draw_trapezoid(c.data, MAGENTA)
+      yield
+      destroy_trapezoid(lines)
+
       d.data.rightp = e[1]
+      lines = draw_trapezoid(d.data, MAGENTA)
+      yield
+      destroy_trapezoid(lines)
 
       b = Node.new(:TRAP, Trapezoid.new(e[1], trap.data.rightp, trap.data.top, trap.data.bottom))
+      lines = draw_trapezoid(b.data, MAGENTA)
+      yield
+      destroy_trapezoid(lines)
+
       qi = Node.new(:POINT, e[1])
       qi.left = si
       qi.right = b
@@ -236,6 +295,8 @@ class Randomized < Algorithm
       b.data.bln = d
       b.data.urn = trap.data.urn
       b.data.brn = trap.data.brn
+      trap.data.urn.uln = b unless trap.data.urn.nil?
+      trap.data.brn.bln = b unless trap.data.brn.nil?
 
       line.destroy
     end
