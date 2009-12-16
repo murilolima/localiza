@@ -1,4 +1,19 @@
+#!/usr/bin/ruby -w
 # -*- coding: utf-8 -*-
+=begin
+* Name: rplac file-reading tool
+* Description: reads a file and builds the basic data structures.
+* Author: Joel Uchoa
+* Date: 2009-12-09
+* License:
+
+rplac 0.1, Copyright (C) 2009  Joel Uchoa, Murilo de Lima
+rplac comes with ABSOLUTELY NO WARRANTY; for detais see `gpl-2.0.txt'.
+This is free software, and you are welcome to redistribute it
+under certain conditions; see `gpl-2.0.txt' for details.
+
+=end
+
 require 'lib/structures'
 
 class Reader

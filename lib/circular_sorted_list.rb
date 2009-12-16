@@ -1,3 +1,18 @@
+#!/usr/bin/ruby -w
+# -*- coding: utf-8 -*-
+=begin
+* Name: circular sorted list
+* Description: simple circular sorted list
+* Author: Joel Uchoa
+* Date: 2009-11-26
+* License:
+
+rplac 0.1, Copyright (C) 2009  Joel Uchoa, Murilo de Lima
+rplac comes with ABSOLUTELY NO WARRANTY; for detais see `gpl-2.0.txt'.
+This is free software, and you are welcome to redistribute it
+under certain conditions; see `gpl-2.0.txt' for details.
+
+=end
 
 class CircularSortedList
 

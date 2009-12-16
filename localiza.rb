@@ -93,6 +93,7 @@ def open_diag_file
       write_status_bar(:open_file_end)
     rescue Exception => error
       puts error
+      puts error.backtrace
       dialog = Gtk::MessageDialog.new($prog.glade['main_window'],
                                 Gtk::Dialog::DESTROY_WITH_PARENT,
                                 Gtk::MessageDialog::ERROR,
@@ -179,7 +180,6 @@ def update_delay
   $delay = 1.0/(speed*(max-min)/100.0 + min) # TODO generalizar pra não precisar recalcular na mão
 end
 
-# TODO renomear estes métodos e colocar em outros arquivos
 def alg1
   simple = Simple.new($map, $painter, $prog.glade['statusbar_alg'], $prog.glade['main_statusbar'])
   simple.build_grid do
@@ -193,6 +193,7 @@ def alg1
   end
 rescue Exception => error
   puts error
+  puts error.backtrace
 end
 
 def alg2
@@ -208,6 +209,7 @@ def alg2
   end
 rescue Exception => error
   puts error
+  puts error.backtrace
 end
 
 def run_alg(&blk)

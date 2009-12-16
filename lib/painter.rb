@@ -1,8 +1,8 @@
-#!/usr/bin/env ruby -w
+#!/usr/bin/ruby -w
 # -*- coding: utf-8 -*-
 =begin
 * Name: rplac painter class
-* Description: this class turn easy draw in Gtk::Drawing_area
+* Description: this class turn easy draw in Gnome::Canvas
 * Author: Joel Uchoa
 * Date: 2009-11-25
 * License:
@@ -130,7 +130,6 @@ class Painter
                              :fill_color => fill_color,
                              :outline_color => edges_color,
                              :width_units => 1.0)
-    #points.each { |p| draw_point(p, points_color) } if draw_points
   end
 
 end

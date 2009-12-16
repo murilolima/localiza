@@ -1,4 +1,23 @@
+#!/usr/bin/ruby -w
 # -*- coding: utf-8 -*-
+=begin
+* Name: simple point location algorithm
+* Description: simple algorithm, line-sweep based. The data structure
+consumes O(n²) space and O(n²) time to be built. A query consumes
+O(lg n) time. For a detailed description, see
+de Berg et al. Computational geometry, algorithms and applications,
+Springer Verlag, 2nd edition, 2000, ch. 6, beginning of section 6.1.
+* Author: Joel Uchoa
+* Date: 2009-12-09
+* License:
+
+rplac 0.1, Copyright (C) 2009  Joel Uchoa, Murilo de Lima
+rplac comes with ABSOLUTELY NO WARRANTY; for detais see `gpl-2.0.txt'.
+This is free software, and you are welcome to redistribute it
+under certain conditions; see `gpl-2.0.txt' for details.
+
+=end
+
 require 'rubygems'
 require 'rbtree'
 require 'lib/structures'
