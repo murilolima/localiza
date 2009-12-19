@@ -35,6 +35,20 @@ RED	= '#FF0000'
 YELLOW  = '#FFFF00'
 
 
+class TriangleDrawing
+  def initialize(l1, l2, l3)
+    @l1 = l1
+    @l2 = l2
+    @l3 = l3
+  end
+
+  def destroy
+    @l1.destroy unless @l1.nil?
+    @l2.destroy unless @l2.nil?
+    @l3.destroy unless @l3.nil?
+  end
+end
+
 class Painter
   attr_reader :wigth, :height, :minus_inf, :plus_inf, :x1bd, :x2bd, :y1bd, :y2bd
 
@@ -136,7 +150,7 @@ class Painter
     l1 = draw_line(p1, p2, color)
     l2 = draw_line(p2, p3, color)
     l3 = draw_line(p1, p3, color)
-    [l1, l2, l3]
+    TriangleDrawing.new(l1, l2, l3)
   end
 
 end

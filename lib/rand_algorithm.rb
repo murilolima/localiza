@@ -37,9 +37,9 @@ class Node
     if @type == :TRAP
       self
     elsif @type == :EDGE
-      lines = alg.painter.draw_triang(@data[0], @data[1], e[0], YELLOW)
+      triang = alg.painter.draw_triang(@data[0], @data[1], e[0], YELLOW)
       yield
-      lines.each { |l| l.destroy }
+      triang.destroy
       
       v = area2(@data[0], @data[1], e[0])
       if v > 0 or (v == 0 and (@data[1] - @data[0]).angle < (e[1] - e[0]).angle)
@@ -76,9 +76,9 @@ class Node
         pred.destroy
       end
     elsif @type == :EDGE
-      lines = alg.painter.draw_triang(@data[0], @data[1], p, YELLOW)
+      triang = alg.painter.draw_triang(@data[0], @data[1], p, YELLOW)
       yield
-      lines.each { |l| l.destroy }
+      triang.destroy
 
       v = area2(@data[0], @data[1], p)
       if v > 0
@@ -168,9 +168,9 @@ class Randomized < Algorithm
     yield
     l1.destroy
     while e[1] > (lt = traps.last).data.rightp
-      ls = @painter.draw_triang(e[0], e[1], lt.data.rightp, YELLOW)
+      triang = @painter.draw_triang(e[0], e[1], lt.data.rightp, YELLOW)
       yield
-      ls.each { |l| l.destroy }
+      triang.destroy
       if right(e[0], e[1], lt.data.rightp)
         traps << lt.data.urn
       else
@@ -286,9 +286,9 @@ class Randomized < Algorithm
           trap.data.brn.data.bln = d
         end
 
-        lines = @painter.draw_triang(e[0], e[1], trap.data.rightp, YELLOW)
+        triang = @painter.draw_triang(e[0], e[1], trap.data.rightp, YELLOW)
         yield
-        lines.each { |l| l.destroy }
+        triang.destroy
         if left(e[0], e[1], trap.data.rightp)
           # closes the upper trapezoid (C)
           c.data.rightp = trap.data.rightp
