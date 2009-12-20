@@ -72,7 +72,8 @@ end
 # geometric functions/predicates (global)
 def area2(p1, p2, p3, painter = nil)
   unless painter.nil?
-    tri = painter.draw_polygon([p1, p2, p3], MAGENTA, MAGENTA)
+    #tri = painter.draw_polygon([p1, p2, p3], MAGENTA, MAGENTA)
+    tri = painter.draw_triang(p1, p2, p3, MAGENTA)
     yield
     tri.destroy
   end

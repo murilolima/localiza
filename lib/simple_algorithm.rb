@@ -18,7 +18,6 @@ under certain conditions; see `gpl-2.0.txt' for details.
 
 =end
 
-require 'rubygems'
 require 'set'
 require 'lib/structures'
 require 'lib/painter'
@@ -58,27 +57,42 @@ class Simple < Algorithm
   class ElementOrder < Element
     include Comparable
 
+    def self.show
+      @@show
+    end
+
+    def self.show=(v)
+      @@show = v
+    end
+
     def initialize(element, alg)
       @edge = element.edge
       @idx = element.idx
       @alg = alg
+      @@show = true
     end
 
     def <=>(other)
-      delay = @alg.delay
-      painter = @alg.painter
+      delay = 0
+      if @@show
+        delay = @alg.delay
+        painter = @alg.painter
 
-      e1 = painter.draw_line(@edge[0], @edge[1], BLUE)
-      e2 = painter.draw_line(other.edge[0], other.edge[1], BLUE)
-      sleep delay
-      if (right(@edge[0], @edge[1], other.edge[0], painter) {sleep delay} and right(@edge[0], @edge[1], other.edge[1], painter) {sleep delay}) or
+        e1 = painter.draw_line(@edge[0], @edge[1], BLUE)
+        e2 = painter.draw_line(other.edge[0], other.edge[1], BLUE)
+        sleep delay
+      end
+      if @edge == other.edge
+        ret = 0
+      elsif (right(@edge[0], @edge[1], other.edge[0], painter) {sleep delay} and right(@edge[0], @edge[1], other.edge[1], painter) {sleep delay}) or
         (left(other.edge[0], other.edge[1], @edge[0], painter) {sleep delay} and left(other.edge[0], other.edge[1], @edge[1], painter) {sleep delay})
         ret = 1
       else
         ret = -1
       end
-      ret = 0 if @edge == other.edge
-      e1.destroy; e2.destroy
+      if @@show
+        e1.destroy; e2.destroy
+      end
 
       ret
     end
@@ -123,21 +137,26 @@ class Simple < Algorithm
       redp = @painter.draw_point(p, RED)
       yield
 
+      ElementOrder.show = false
       @grid << order.to_a # adicionado faixa que limita superiormente por 'x'
+      ElementOrder.show = true
+      yield
 
       while linesweep.min != nil and (e = linesweep.min[0]).edge[1] <= p # removendo as aresta que sairam da faixa
-        linesweep.min[1].destroy
-        linesweep.delete(e)
-        order.delete(ElementOrder.new(e, self))
+        eo = linesweep.min[1][0]
+        order.delete(eo)
+        linesweep.min[1][1].destroy
         yield
+        linesweep.delete(e)
       end
 
       while index < ordered_edges.size # adicionando arestas entrando na faixa
         e = ordered_edges[index]
+        eo = ElementOrder.new(e, self)
         break if e.edge[0] > p
-        linesweep[e] = @painter.draw_line(e.edge[0],e.edge[1], LIME)
+        linesweep[e] = [eo, @painter.draw_line(e.edge[0],e.edge[1], LIME)]
+        order << eo
         yield
-        order << ElementOrder.new(e, self)
         index += 1
       end
 
@@ -206,12 +225,12 @@ class Simple < Algorithm
           e = stripe[mid].edge
           edge = @painter.draw_line(e[0],e[1], LIME)
           yield
-          edge.destroy
-          if right(e[0], e[1], point)
+          if right(e[0], e[1], point, @painter)
             upper = mid
           else
             lower = mid
           end
+          edge.destroy
         end
 
         if area2(stripe[lower].edge[0], stripe[lower].edge[1], point, @painter) {yield} == 0

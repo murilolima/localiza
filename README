@@ -1,10 +1,8 @@
-== gems requireds to development
-    rake
-    rspec
-
-== task on Rakefile
-    'rake' or 'rake run' execute the applicaion
-    'rake test' execute the tests with rspec
+=======
+Dependências:
+    ruby
+    glade
+    ruby-gnome2
 
 =======
 Para executar:
