@@ -27,7 +27,7 @@ require 'file_diag'
 require 'lib/structures'
 require 'lib/painter'
 require 'lib/reader'
-require 'lib/simple_algorithm'
+#require 'lib/simple_algorithm'
 require 'lib/rand_algorithm'
 
 class LocalizaGlade
@@ -177,48 +177,31 @@ def update_delay
   # the delay is the inverse of that
   min = 1/3.0; max = 30.0
   speed = $prog.glade['speed_bar'].value
-  $delay = 1.0/(speed*(max-min)/100.0 + min) # TODO generalizar pra não precisar recalcular na mão
+  $delay = 1.0/(speed*(max-min)/100.0 + min)
 end
 
-def alg1
-  simple = Simple.new($map, $painter, $prog.glade['statusbar_alg'], $prog.glade['main_statusbar'])
-  simple.build_grid do
-    yield nil
-  end
-  yield 1
-  $queries.each do |p|
-    simple.query(p) do
-      yield nil
-    end
-  end
-rescue Exception => error
-  puts error
-  puts error.backtrace
-end
-
-def alg2
-  rand = Randomized.new($map, $painter, $prog.glade['statusbar_alg'], $prog.glade['main_statusbar'])
-  rand.build_struct do
-    yield nil
-  end
-  yield 1
-  $queries.each do |p|
-    rand.query(p) do
-      yield nil
-    end
-  end
-rescue Exception => error
-  puts error
-  puts error.backtrace
-end
-
-def run_alg(&blk)
+def run_alg
+  alg_class = nil
   case $row_alg.val
   when 0
-    alg1(&blk)
+    alg_class = Simple
   when 1
-    alg2(&blk)
+    alg_class = Randomized
   end
+
+  alg = alg_class.new($map, $painter, $prog.glade['statusbar_alg'], $prog.glade['main_statusbar'], $prog.glade['main_window'])
+  alg.build_struct do
+    yield nil
+  end
+  yield 1
+  $queries.each do |p|
+    alg.query(p) do
+      yield nil
+    end
+  end
+rescue Exception => error
+  puts error
+  puts error.backtrace
 end
 
 def start_it_all

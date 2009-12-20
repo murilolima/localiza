@@ -35,6 +35,20 @@ RED	= '#FF0000'
 YELLOW  = '#FFFF00'
 
 
+class TriangleDrawing
+  def initialize(l1, l2, l3)
+    @l1 = l1
+    @l2 = l2
+    @l3 = l3
+  end
+
+  def destroy
+    @l1.destroy unless @l1.nil?
+    @l2.destroy unless @l2.nil?
+    @l3.destroy unless @l3.nil?
+  end
+end
+
 class Painter
   attr_reader :wigth, :height, :minus_inf, :plus_inf, :x1bd, :x2bd, :y1bd, :y2bd
 
@@ -63,7 +77,7 @@ class Painter
     w = @width - 2 * BORDER
     h = @height - 2 * BORDER
 
-    @scale = [w/x_diff, h/y_diff].min # scale to fit points in drawing_area
+    @scale = [w.to_f/x_diff, h.to_f/y_diff].min # scale to fit points in drawing_area
 
     x_center = (@x_min + @x_max) * 0.5
     y_center = (@y_min + @y_max) * 0.5
@@ -85,7 +99,7 @@ class Painter
 
   def scale_and_translate(point)
     p = ((point * @scale) + Point.new(@x_offset, @y_offset))
-    Point.new(p.x, @height - BORDER - p.y) # convert the origin for left-botton
+    Point.new(p.x.to_i, (@height - BORDER - p.y).to_i) # convert the origin for left-botton
   end
 
   def clear
@@ -130,6 +144,13 @@ class Painter
                              :fill_color => fill_color,
                              :outline_color => edges_color,
                              :width_units => 1.0)
+  end
+
+  def draw_triang(p1, p2, p3, color)
+    l1 = draw_line(p1, p2, color)
+    l2 = draw_line(p2, p3, color)
+    l3 = draw_line(p1, p3, color)
+    TriangleDrawing.new(l1, l2, l3)
   end
 
 end

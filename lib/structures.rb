@@ -25,7 +25,7 @@ class Point
   attr_reader :x, :y
 
   def initialize(x=0, y=0)
-    @x, @y = x.to_i, y.to_i
+    @x, @y = x, y
   end
 
   def +(other)
@@ -63,7 +63,8 @@ class Point
   end
 
   def inspect
-    "#Point<#{to_s}>"
+#    "#Point<#{to_s}>"
+    to_s
   end
 
 end

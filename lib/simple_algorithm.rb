@@ -55,7 +55,7 @@ class Simple < Algorithm
     end
   end
 
-  def build_grid
+  def build_struct
     @map.paint(@painter)
     yield
 
@@ -142,9 +142,11 @@ class Simple < Algorithm
     pivot, stripe = @grid.lower_bound(point) # TODO pintar arestas na busca (criar classe)
     
     if pivot == point
-      puts "sobre o ponto"
+      on_the_point(point)
+      yield
     elsif stripe.size == 0
-      puts "FORA!"
+      outside(point)
+      yield
       # ponto estah fora de todas as regioes
     else
       lower = 0; upper = (stripe.size) -1
@@ -159,8 +161,14 @@ class Simple < Algorithm
       l2 = @painter.draw_line(x2, y2, LIME)
       l2.destroy
       yield
+<<<<<<< HEAD
       if rights(x1, y1, point, @painter) {yield} or lefts(x2, y2, point, @painter) {yield}
         puts "fora"
+=======
+      if rights(x1, y1, point) or lefts(x2, y2, point)
+        outside(point)
+        yield
+>>>>>>> 17db9175b9db70c1ce627f9d54a69df79402d9c9
       else
         while lower < upper -1
           mid = (lower + upper) / 2
@@ -175,14 +183,18 @@ class Simple < Algorithm
           end
         end
 
-        if (area2(stripe[lower].edge[0], stripe[lower].edge[1], point) == 0) or
-          (area2(stripe[upper].edge[0], stripe[upper].edge[1], point) == 0)
-          puts "sobre a aresta"
+        if area2(stripe[lower].edge[0], stripe[lower].edge[1], point) == 0
+          on_the_edge(point, stripe[lower].edge)
+          yield
+        elsif area2(stripe[upper].edge[0], stripe[upper].edge[1], point) == 0
+          on_the_edge(point, stripe[upper].edge)
+          yield
         else
           face_points = @map.structure.get_face_of_edge(stripe[lower].idx).map { |e| e.origin.point }
           poly = @painter.draw_polygon(face_points, LIME, GREY)
           pred.destroy
           pred = @painter.draw_point(point, RED)
+          @mainbar.push(0, "--->>> Ponto localizado!")
           yield
           poly.destroy
         end
