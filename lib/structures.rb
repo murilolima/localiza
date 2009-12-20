@@ -69,26 +69,31 @@ class Point
 end
 
 # geometric functions/predicates (global)
-def area2(p1, p2, p3)
+def area2(p1, p2, p3, painter = nil)
+  unless painter.nil?
+    tri = painter.draw_polygon([p1, p2, p3], BLACK, TEAL)
+    yield
+    tri.destroy
+  end
   v1 = p1.x * p2.y + p2.x * p3.y + p3.x * p1.y
   v2 = p1.y * p2.x + p2.y * p3.x + p3.y * p1.x
   v1 - v2
 end
 
-def left(p1, p2, p3)
-  area2(p1, p2, p3) >= 0
+def left(p1, p2, p3, painter = nil)
+  area2(p1, p2, p3, painter) {yield} >= 0
 end
 
-def lefts(p1, p2, p3)
-  area2(p1, p2, p3) > 0
+def lefts(p1, p2, p3, painter = nil)
+  area2(p1, p2, p3, painter) {yield} > 0
 end
 
-def right(p1, p2, p3)
-  !lefts(p1, p2, p3)
+def right(p1, p2, p3, painter = nil)
+  !lefts(p1, p2, p3, painter) {yield}
 end
 
-def rights(p1, p2, p3)
-  !left(p1, p2, p3)
+def rights(p1, p2, p3, painter = nil)
+  !left(p1, p2, p3, painter) {yield}
 end
 
 
@@ -106,7 +111,7 @@ end
 class Edge
   include Comparable
   attr_reader :origin, :dual, :angle, :size
-  attr_accessor :next, :prev, :face
+  attr_accessor :next, :prev
   
   def initialize(origin, destination, dual = nil)
     @origin = origin
@@ -123,10 +128,6 @@ class Edge
     return 0
   end
 
-end
-
-class Face
-  
 end
 
 class DoubleConnectedEdgeList

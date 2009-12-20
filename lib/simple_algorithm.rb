@@ -105,8 +105,8 @@ class Simple < Algorithm
         e2 = @painter.draw_line(b.edge[0], b.edge[1], BLUE)
         yield
         e1.destroy; e2.destroy
-        if (right(a.edge[0], a.edge[1], b.edge[0]) and right(a.edge[0], a.edge[1], b.edge[1])) or
-          (left(b.edge[0], b.edge[1], a.edge[0]) and left(b.edge[0], b.edge[1], a.edge[1]))
+        if (right(a.edge[0], a.edge[1], b.edge[0], @painter) {yield} and right(a.edge[0], a.edge[1], b.edge[1], @painter) {yield}) or
+          (left(b.edge[0], b.edge[1], a.edge[0], @painter) {yield} and left(b.edge[0], b.edge[1], a.edge[1], @painter) {yield})
           1
         else
           -1
@@ -159,7 +159,7 @@ class Simple < Algorithm
       l2 = @painter.draw_line(x2, y2, LIME)
       l2.destroy
       yield
-      if rights(x1, y1, point) or lefts(x2, y2, point)
+      if rights(x1, y1, point, @painter) {yield} or lefts(x2, y2, point, @painter) {yield}
         puts "fora"
       else
         while lower < upper -1
