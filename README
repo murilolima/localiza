@@ -1,15 +1,46 @@
 =======
-Dependências :
+Dependências:
     git-core
     ruby
     glade
     ruby-gnome2
 
-OBS: Os nomes das dependências são os mesmos nomes
-dos pacotes para isntalar com apt-get em dibian-based linuxs.
+=======
+Instalando:
+    1 - Como root execute:
+
+        # apt-get install git-core ruby glade ruby-gnome2
+
+    2 - Como usuário "normal"; entre na pasta onde deseja que o 
+    projeto esteja e execute:
+
+        $ git clone git://github.com/murilolima/localiza.git
+
+    O último comando criará uma pasta, dentro da
+    pasta atual, chamada "localiza" que contém o projeto.
 
 =======
 Para executar:
    ruby -w localiza.rb
 ou
    ./localiza.rb
+
+=======
+Formato do Arquivo de Entrada:
+Primeira linha 2 inteiros N e M separados por um espaço, onde
+N significa o número de pontos (vértices) e M o número de 
+segmentos (arestas).
+
+Em cada das próximas N linhas, temos as coordenadas x e y de cada
+ponto separadas por um espaço.
+
+Em seguida temos M linhas contendo a descrição de cada segmento. 
+Essa descrição consiste nos 2 indices dos pontos que são extremos
+do segmento. O indice que identifica um ponto é um inteiro
+zero-indexado de acordo com a ordem que o ponto foi descrito
+no arquivo de entrada.
+
+Por fim, temos na linha seguinte, um número Q de consultas, 
+e em seguida Q linhas cada contendo as coordenadas
+de um ponto a qual se deseja saber a que região ele pertence.
+
