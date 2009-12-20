@@ -178,10 +178,10 @@ class Simple < Algorithm
           end
         end
 
-        if area2(stripe[lower].edge[0], stripe[lower].edge[1], point, @painter) == 0
+        if area2(stripe[lower].edge[0], stripe[lower].edge[1], point, @painter) {yield} == 0
           on_the_edge(point, stripe[lower].edge)
           yield
-        elsif area2(stripe[upper].edge[0], stripe[upper].edge[1], point, @painter) == 0
+        elsif area2(stripe[upper].edge[0], stripe[upper].edge[1], point, @painter) {yield} == 0
           on_the_edge(point, stripe[upper].edge)
           yield
         else

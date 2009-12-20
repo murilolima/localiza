@@ -27,7 +27,7 @@ require 'file_diag'
 require 'lib/structures'
 require 'lib/painter'
 require 'lib/reader'
-#require 'lib/simple_algorithm'
+require 'lib/simple_algorithm'
 require 'lib/rand_algorithm'
 
 class LocalizaGlade
