@@ -79,13 +79,7 @@ class Simple < Algorithm
     ordered_edges = []
     edges = @map.edges.map {|e| [@map.points[e[0]],@map.points[e[1]]] }
     edges.each_with_index { |e,i| ordered_edges << Element.new(e,i) }
-    ordered_edges.sort! do |a,b|
-      e1 = @painter.draw_line(a.edge[0], a.edge[1], LIME)
-      e2 = @painter.draw_line(b.edge[0], b.edge[1], LIME)
-      yield
-      e1.destroy; e2.destroy
-      a.edge[0] <=> b.edge[0]
-    end
+    
     index = 0;
 
     @mainbar.push(0, "Construindo estrutura de dados...")

@@ -72,7 +72,7 @@ end
 # geometric functions/predicates (global)
 def area2(p1, p2, p3, painter = nil)
   unless painter.nil?
-    tri = painter.draw_polygon([p1, p2, p3], BLACK, TEAL)
+    tri = painter.draw_polygon([p1, p2, p3], MAGENTA, MAGENTA)
     yield
     tri.destroy
   end
@@ -207,10 +207,20 @@ class Map
   end
 
   def add_edge(point1_idx, point2_idx)
+    if @points[point1_idx] > @points[point2_idx]
+        point1_idx, point2_idx = point2_idx, point1_idx
+    end
     @edges << [point1_idx, point2_idx]
   end
 
   def build_structure
+    @edges.sort! do |a,b|
+      if @points[a[0]] != @points[b[0]]
+        @points[a[0]] <=> @points[b[0]]
+      else
+        @points[a[1]] <=> @points[b[1]]
+      end
+    end
     @structure = DoubleConnectedEdgeList.new
     @points.each { |p| @structure.add_vertex(p) }
     @edges.each { |e| @structure.add_edge(e[0], e[1]) }
