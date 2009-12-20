@@ -61,9 +61,9 @@ class Simple < Algorithm
 
     @mainbar.push(0, "Construindo estrutura de dados... ordenando pontos-eventos")
 
-    events = @map.points.dup # O(n)
-    events << Point.new(@painter.plus_inf, @painter.plus_inf)
-    events.sort! do |a, b|
+    @events = @map.points.dup # O(n)
+    @events << Point.new(@painter.plus_inf, @painter.plus_inf)
+    @events.sort! do |a, b|
       l1 = @painter.draw_line(Point.new(a.x,@painter.minus_inf), Point.new(a.x,@painter.plus_inf), YELLOW)
       p1 = @painter.draw_point(a, RED)
       l2 = @painter.draw_line(Point.new(b.x,@painter.minus_inf), Point.new(b.x,@painter.plus_inf), YELLOW)
@@ -95,7 +95,7 @@ class Simple < Algorithm
     @grid = RBTree.new
 
     last_line = nil
-    events.each do |p|
+    @events.each do |p|
       yell = @painter.draw_line(Point.new(p.x,@painter.minus_inf), Point.new(p.x,@painter.plus_inf), YELLOW)
       redp = @painter.draw_point(p, RED)
       yield
