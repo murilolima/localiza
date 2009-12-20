@@ -166,6 +166,7 @@ class Simple < Algorithm
       last_line = yell
       redp.destroy
     end
+    last_line.destroy unless last_line.nil?
   end
 
   def binary_search_for_stripe(point)

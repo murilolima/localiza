@@ -52,8 +52,8 @@ end
 class Painter
   attr_reader :wigth, :height, :minus_inf, :plus_inf, :x1bd, :x2bd, :y1bd, :y2bd
 
-  BORDER = 10
-  POINT_RADIO = 3
+  BORDER = 20
+  POINT_RADIO = 4
 
   def initialize(points, canvas)
     @canvas = canvas
@@ -83,11 +83,11 @@ class Painter
     y_center = (@y_min + @y_max) * 0.5
 
     # offset to position the scaled points
-    @x_offset = w * 0.5 - x_center * @scale + BORDER
-    @y_offset = h * 0.5 - y_center * @scale + BORDER
+    @x_offset = w * 0.5 - x_center * @scale + BORDER/2
+    @y_offset = h * 0.5 - y_center * @scale + BORDER/2
 
-    @minus_inf = @x_min - BORDER
-    @plus_inf = [@x_max, @y_max].max + BORDER
+    @minus_inf = @x_min - 2*BORDER
+    @plus_inf = [@x_max, @y_max].max + 2*BORDER
 
     @x1bd = @x_min - BORDER
     @x2bd = @x_max + BORDER
