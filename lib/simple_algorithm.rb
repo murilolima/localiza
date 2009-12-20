@@ -142,14 +142,6 @@ class Simple < Algorithm
       ElementOrder.show = true
       yield
 
-      while linesweep.min != nil and (e = linesweep.min[0]).edge[1] <= p # removendo as aresta que sairam da faixa
-        eo = linesweep.min[1][0]
-        order.delete(eo)
-        linesweep.min[1][1].destroy
-        yield
-        linesweep.delete(e)
-      end
-
       while index < ordered_edges.size # adicionando arestas entrando na faixa
         e = ordered_edges[index]
         eo = ElementOrder.new(e, self)
@@ -159,6 +151,16 @@ class Simple < Algorithm
         yield
         index += 1
       end
+
+      while linesweep.min != nil and (e = linesweep.min[0]).edge[1] <= p # removendo as aresta que sairam da faixa
+        eo = linesweep.min[1][0]
+        order.delete(eo)
+        linesweep.min[1][1].destroy
+        yield
+        linesweep.delete(e)
+      end
+
+
 
       last_line.destroy unless last_line.nil?
       last_line = yell
