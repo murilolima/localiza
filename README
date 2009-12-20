@@ -1,8 +1,12 @@
 =======
-Dependências:
+Dependências :
+    git-core
     ruby
     glade
     ruby-gnome2
+
+OBS: Os nomes das dependências são os mesmos nomes
+dos pacotes para isntalar com apt-get em dibian-based linuxs.
 
 =======
 Para executar:
