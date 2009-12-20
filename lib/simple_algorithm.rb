@@ -19,7 +19,7 @@ under certain conditions; see `gpl-2.0.txt' for details.
 =end
 
 require 'rubygems'
-require 'rbtree'
+require 'set'
 require 'lib/structures'
 require 'lib/painter'
 require 'lib/algorithm'
@@ -55,6 +55,36 @@ class Simple < Algorithm
     end
   end
 
+  class ElementOrder < Element
+    include Comparable
+
+    def initialize(element, alg)
+      @edge = element.edge
+      @idx = element.idx
+      @alg = alg
+    end
+
+    def <=>(other)
+      delay = @alg.delay
+      painter = @alg.painter
+
+      e1 = painter.draw_line(@edge[0], @edge[1], BLUE)
+      e2 = painter.draw_line(other.edge[0], other.edge[1], BLUE)
+      sleep delay
+      if (right(@edge[0], @edge[1], other.edge[0], painter) {sleep delay} and right(@edge[0], @edge[1], other.edge[1], painter) {sleep delay}) or
+        (left(other.edge[0], other.edge[1], @edge[0], painter) {sleep delay} and left(other.edge[0], other.edge[1], @edge[1], painter) {sleep delay})
+        ret = 1
+      else
+        ret = -1
+      end
+      ret = 0 if @edge == other.edge
+      e1.destroy; e2.destroy
+
+      ret
+    end
+
+  end
+
   def build_struct
     @map.paint(@painter)
     yield
@@ -74,19 +104,18 @@ class Simple < Algorithm
       a <=> b
     end
 
-    @mainbar.push(0, "Construindo estrutura de dados... ordenando arestas pela ponta mais à esquerda")
-
     ordered_edges = []
     edges = @map.edges.map {|e| [@map.points[e[0]],@map.points[e[1]]] }
     edges.each_with_index { |e,i| ordered_edges << Element.new(e,i) }
-    
+
     index = 0;
 
     @mainbar.push(0, "Construindo estrutura de dados...")
 
-    linesweep = RBTree.new
+    linesweep = {}
+    order = SortedSet.new
 
-    @grid = RBTree.new
+    @grid = []
 
     last_line = nil
     @events.each do |p|
@@ -94,32 +123,22 @@ class Simple < Algorithm
       redp = @painter.draw_point(p, RED)
       yield
 
-      order = linesweep.keys.sort do |a,b| # ordenado faixa
-        e1 = @painter.draw_line(a.edge[0], a.edge[1], BLUE)
-        e2 = @painter.draw_line(b.edge[0], b.edge[1], BLUE)
+      @grid << order.to_a # adicionado faixa que limita superiormente por 'x'
+
+      while linesweep.min != nil and (e = linesweep.min[0]).edge[1] <= p # removendo as aresta que sairam da faixa
+        linesweep.min[1].destroy
+        linesweep.delete(e)
+        order.delete(ElementOrder.new(e, self))
         yield
-        e1.destroy; e2.destroy
-        if (right(a.edge[0], a.edge[1], b.edge[0], @painter) {yield} and right(a.edge[0], a.edge[1], b.edge[1], @painter) {yield}) or
-          (left(b.edge[0], b.edge[1], a.edge[0], @painter) {yield} and left(b.edge[0], b.edge[1], a.edge[1], @painter) {yield})
-          1
-        else
-          -1
-        end
       end
-      @grid[p] = order # adicionado faixa que limita superiormente por 'x'
 
       while index < ordered_edges.size # adicionando arestas entrando na faixa
         e = ordered_edges[index]
         break if e.edge[0] > p
         linesweep[e] = @painter.draw_line(e.edge[0],e.edge[1], LIME)
         yield
+        order << ElementOrder.new(e, self)
         index += 1
-      end
-
-      while linesweep.first != nil and (e = linesweep.first[0]).edge[1] <= p # removendo as aresta que sairam da faixa
-        linesweep.first[1].destroy
-        linesweep.delete(e)
-        yield
       end
 
       last_line.destroy unless last_line.nil?
@@ -128,13 +147,36 @@ class Simple < Algorithm
     end
   end
 
+  def binary_search_for_stripe(point)
+    lower = 0; upper = @events.size
+    while lower < upper
+      mid = (lower + upper) / 2
+
+      p = @events[mid]
+      dl = @painter.draw_line(Point.new(p.x,@painter.minus_inf), Point.new(p.x,@painter.plus_inf), YELLOW)
+      dp = @painter.draw_point(p, RED)
+      yield
+      dl.destroy; dp.destroy
+
+      if p < point
+        lower = mid + 1
+      else
+        upper = mid
+      end
+    end
+    pivot = @events[lower]
+    stripe = @grid[lower]
+
+    [pivot, stripe]
+  end
+
   def query(point)
     @mainbar.push(0, "Buscando ponto #{point}...")
     pred = @painter.draw_point(point, RED)
     yield
 
-    pivot, stripe = @grid.lower_bound(point) # TODO pintar arestas na busca (criar classe)
-    
+    pivot, stripe = binary_search_for_stripe(point) { yield }
+
     if pivot == point
       on_the_point(point)
       yield

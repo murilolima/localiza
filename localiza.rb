@@ -191,11 +191,13 @@ def run_alg
 
   alg = alg_class.new($map, $painter, $prog.glade['statusbar_alg'], $prog.glade['main_statusbar'], $prog.glade['main_window'])
   alg.build_struct do
+    alg.delay = $delay
     yield nil
   end
   yield 1
   $queries.each do |p|
     alg.query(p) do
+      alg.delay = $delay
       yield nil
     end
   end

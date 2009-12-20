@@ -17,6 +17,7 @@ under certain conditions; see `gpl-2.0.txt' for details.
 
 class Algorithm
   attr_reader :map, :painter, :mainbar
+  attr_accessor :delay
   
   def initialize(map, painter, statusbar, mainbar, mainwindow)
     @map = map
