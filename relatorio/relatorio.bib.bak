@@ -1,0 +1,21 @@
+% This file was created with JabRef 2.6b2.
+% Encoding: UTF-8
+
+@BOOK{deberg97,
+  title = {Computational geometry, algorithms and applications},
+  publisher = {Springer Verlag},
+  year = {1997},
+  author = {M. de Berg and M. van Kreveld and M. Overmars and O. Schwarzkopf},
+  edition = {second edition, 2000},
+  owner = {murilo},
+  timestamp = {2009.12.20}
+}
+
+@comment{jabref-meta: selector_publisher:}
+
+@comment{jabref-meta: selector_author:}
+
+@comment{jabref-meta: selector_journal:}
+
+@comment{jabref-meta: selector_keywords:}
+

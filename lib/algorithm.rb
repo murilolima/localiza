@@ -26,16 +26,14 @@ class Algorithm
     @mainbar = mainbar
     @mainwindow = mainwindow
 
-    @memory = 0
     @compar = 0
 
-    @statusbar.push(0, "Consumo de memória: #{@memory} bytes        Número de comparações: #{@compar}")
+    @statusbar.push(0, "Número de comparações: #{@compar}")
   end
 
-  def inc_counter(memory, compar)
-    @memory += memory
-    @compar += compar
-    @statusbar.push(0, "Consumo de memória: #{@memory} bytes        Número de comparações: #{@compar}")
+  def inc_counter(increment = 1)
+    @compar += increment
+    @statusbar.push(0, "Número de comparações: #{@compar}")
   end
 
   def build_struct # to be inherited

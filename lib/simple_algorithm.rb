@@ -73,6 +73,7 @@ class Simple < Algorithm
     end
 
     def <=>(other)
+      @alg.inc_counter
       delay = 0
       if @@show
         delay = @alg.delay
@@ -86,8 +87,10 @@ class Simple < Algorithm
         ret = 0
       elsif (right(@edge[0], @edge[1], other.edge[0], painter) {sleep delay} and right(@edge[0], @edge[1], other.edge[1], painter) {sleep delay}) or
         (left(other.edge[0], other.edge[1], @edge[0], painter) {sleep delay} and left(other.edge[0], other.edge[1], @edge[1], painter) {sleep delay})
+        @alg.inc_counter(4)
         ret = 1
       else
+        @alg.inc_counter(4)
         ret = -1
       end
       if @@show
@@ -108,13 +111,15 @@ class Simple < Algorithm
     @events = @map.points.dup # O(n)
     @events << Point.new(@painter.plus_inf, @painter.plus_inf)
     @events.sort! do |a, b|
-      l1 = @painter.draw_line(Point.new(a.x,@painter.minus_inf), Point.new(a.x,@painter.plus_inf), YELLOW)
-      p1 = @painter.draw_point(a, RED)
-      l2 = @painter.draw_line(Point.new(b.x,@painter.minus_inf), Point.new(b.x,@painter.plus_inf), YELLOW)
-      p2 = @painter.draw_point(b, RED)
-      yield
-      l1.destroy; l2.destroy
-      p1.destroy; p2.destroy
+      # não precisa animar esta parte
+#      l1 = @painter.draw_line(Point.new(a.x,@painter.minus_inf), Point.new(a.x,@painter.plus_inf), YELLOW)
+#      p1 = @painter.draw_point(a, RED)
+#      l2 = @painter.draw_line(Point.new(b.x,@painter.minus_inf), Point.new(b.x,@painter.plus_inf), YELLOW)
+#      p2 = @painter.draw_point(b, RED)
+#      yield
+#      l1.destroy; l2.destroy
+#      p1.destroy; p2.destroy
+      inc_counter
       a <=> b
     end
 
@@ -136,6 +141,7 @@ class Simple < Algorithm
       yell = @painter.draw_line(Point.new(p.x,@painter.minus_inf), Point.new(p.x,@painter.plus_inf), YELLOW)
       redp = @painter.draw_point(p, RED)
       yield
+      inc_counter
 
       ElementOrder.show = false
       @grid << order.to_a # adicionado faixa que limita superiormente por 'x'
@@ -143,6 +149,7 @@ class Simple < Algorithm
       yield
 
       while index < ordered_edges.size # adicionando arestas entrando na faixa
+        inc_counter
         e = ordered_edges[index]
         eo = ElementOrder.new(e, self)
         break if e.edge[0] > p
@@ -153,6 +160,7 @@ class Simple < Algorithm
       end
 
       while linesweep.min != nil and (e = linesweep.min[0]).edge[1] <= p # removendo as aresta que sairam da faixa
+        inc_counter
         eo = linesweep.min[1][0]
         order.delete(eo)
         linesweep.min[1][1].destroy
@@ -171,7 +179,9 @@ class Simple < Algorithm
 
   def binary_search_for_stripe(point)
     lower = 0; upper = @events.size
+    inc_counter
     while lower < upper
+      inc_counter
       mid = (lower + upper) / 2
 
       p = @events[mid]
@@ -196,6 +206,7 @@ class Simple < Algorithm
     @mainbar.push(0, "Buscando ponto #{point}...")
     pred = @painter.draw_point(point, RED)
     yield
+    inc_counter
 
     pivot, stripe = binary_search_for_stripe(point) { yield }
 
@@ -219,6 +230,7 @@ class Simple < Algorithm
       l2 = @painter.draw_line(x2, y2, LIME)
       l2.destroy
       yield
+      inc_counter(2)
       if rights(x1, y1, point, @painter) {yield} or lefts(x2, y2, point, @painter) {yield}
         outside(point)
         yield
@@ -228,7 +240,8 @@ class Simple < Algorithm
           e = stripe[mid].edge
           edge = @painter.draw_line(e[0],e[1], LIME)
           yield
-          if right(e[0], e[1], point, @painter)
+          inc_counter
+          if right(e[0], e[1], point, @painter) {yield}
             upper = mid
           else
             lower = mid
@@ -236,13 +249,16 @@ class Simple < Algorithm
           edge.destroy
         end
 
+        inc_counter
         if area2(stripe[lower].edge[0], stripe[lower].edge[1], point, @painter) {yield} == 0
           on_the_edge(point, stripe[lower].edge)
           yield
         elsif area2(stripe[upper].edge[0], stripe[upper].edge[1], point, @painter) {yield} == 0
           on_the_edge(point, stripe[upper].edge)
           yield
+          inc_counter
         else
+          inc_counter
           face_points = @map.structure.get_face_of_edge(stripe[lower].idx).map { |e| e.origin.point }
           poly = @painter.draw_polygon(face_points, LIME, GREY)
           pred.destroy

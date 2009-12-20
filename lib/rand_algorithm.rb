@@ -35,12 +35,14 @@ class Node
 
   def find_trapezoid(e, alg)
     if @type == :TRAP
+      alg.inc_counter
       self
     elsif @type == :EDGE
       triang = alg.painter.draw_triang(@data[0], @data[1], e[0], YELLOW)
       yield
       triang.destroy
       
+      alg.inc_counter
       v = area2(@data[0], @data[1], e[0])
       if v > 0 or (v == 0 and (@data[1] - @data[0]).angle < (e[1] - e[0]).angle)
         @left.find_trapezoid(e, alg) { yield }
@@ -52,6 +54,7 @@ class Node
       yield
       line.destroy
 
+      alg.inc_counter
       if @data <= e[0]
         @right.find_trapezoid(e, alg) { yield }
       else
@@ -62,6 +65,7 @@ class Node
 
   def find_point(p, alg)
     if @type == :TRAP
+      alg.inc_counter
       idx = alg.edge_map[@data.bottom]
       if (idx == -1)
         alg.outside(p)
@@ -79,6 +83,7 @@ class Node
       triang = alg.painter.draw_triang(@data[0], @data[1], p, YELLOW)
       yield
       triang.destroy
+      alg.inc_counter
 
       v = area2(@data[0], @data[1], p)
       if v > 0
@@ -93,6 +98,7 @@ class Node
       line = alg.painter.draw_line(@data, p, YELLOW)
       yield
       line.destroy
+      alg.inc_counter
 
       if @data > p
         @left.find_point(p, alg) { yield }
@@ -166,6 +172,7 @@ class Randomized < Algorithm
 
     l1 = @painter.draw_line(e[1], traps.last.data.rightp, YELLOW)
     yield
+    inc_counter
     l1.destroy
     while e[1] > (lt = traps.last).data.rightp
       triang = @painter.draw_triang(e[0], e[1], lt.data.rightp, YELLOW)
@@ -183,6 +190,7 @@ class Randomized < Algorithm
       l1 = @painter.draw_line(e[1], traps.last.data.rightp, YELLOW)
       yield
       l1.destroy
+      inc_counter
     end
 
     traps
@@ -211,6 +219,7 @@ class Randomized < Algorithm
     @map.edges.each_with_index do |e, id|
       @edge_map[[@map.points[e[0]], @map.points[e[1]]]] = 2*id
       @edge_map[[@map.points[e[1]], @map.points[e[0]]]] = 2*id+1
+      inc_counter
     end
 
     rand_edges = @map.edges.map {|e| [@map.points[e[0]], @map.points[e[1]]].sort}.shuffle
@@ -236,6 +245,7 @@ class Randomized < Algorithm
         a.data.draw(@painter, GREY)
         redraw_edge(e)
         yield
+        inc_counter
 
         # updating left neighbors
         a.data.uln = trap.data.uln
@@ -289,6 +299,7 @@ class Randomized < Algorithm
         triang = @painter.draw_triang(e[0], e[1], trap.data.rightp, YELLOW)
         yield
         triang.destroy
+        inc_counter
         if left(e[0], e[1], trap.data.rightp)
           # closes the upper trapezoid (C)
           c.data.rightp = trap.data.rightp
@@ -342,25 +353,42 @@ class Randomized < Algorithm
         trap.data.bln.data.brn = d
       end
 
-      # creates right trapezoid (B)
-      b = Node.new(:TRAP, Trapezoid.new(e[1], trap.data.rightp, trap.data.top, trap.data.bottom))
-      b.data.draw(@painter, GREY)
-      redraw_edge(e)
-      yield
+      inc_counter
+      if e[1] < trap.data.rightp # creates right trapezoid (B)
+        b = Node.new(:TRAP, Trapezoid.new(e[1], trap.data.rightp, trap.data.top, trap.data.bottom))
+        b.data.draw(@painter, GREY)
+        redraw_edge(e)
+        yield
 
-      trap, qi = Node.new(:TRAP, trap.data), trap
-      qi.type, qi.data = :POINT, e[1]
-      qi.left, qi.right = si, b
+        trap, qi = Node.new(:TRAP, trap.data), trap
+        qi.type, qi.data = :POINT, e[1]
+        qi.left, qi.right = si, b
 
-      c.data.urn = d.data.brn = b
-      b.data.uln, b.data.bln = c, d
+        c.data.urn = d.data.brn = b
+        b.data.uln, b.data.bln = c, d
 
-      # updating right neighbors
-      b.data.urn = trap.data.urn
-      trap.data.urn.data.uln = b unless trap.data.urn.nil?
-      b.data.brn = trap.data.brn
-      trap.data.brn.data.bln = b unless trap.data.brn.nil?
+        # updating right neighbors
+        b.data.urn = trap.data.urn
+        trap.data.urn.data.uln = b unless trap.data.urn.nil?
+        b.data.brn = trap.data.brn
+        trap.data.brn.data.bln = b unless trap.data.brn.nil?
+      else
+        # updates right neighbors
+        ar = area2(e[0], e[1], trap.data.rightp)
+        if ar >= 0 and !trap.data.urn.nil?
+          c.data.urn = trap.data.urn
+          trap.data.urn.data.uln = c
+        end
+        if ar <= 0 and !trap.data.brn.nil?
+          d.data.brn = trap.data.brn
+          trap.data.brn.data.bln = d
+        end
 
+        # replacing on the tree
+        trap.type, trap.data = si.type, si.data
+        trap.left, trap.right = si.left, si.right
+      end
+      
       @line.destroy
     end
 
