@@ -20,6 +20,7 @@ under certain conditions; see `gpl-2.0.txt' for details.
 
 require 'libglade2'
 require 'gnomecanvas2'
+require 'thread'
 
 require 'about'
 require 'file_diag'
